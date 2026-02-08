@@ -15,13 +15,5 @@ export default {
 		githubEditBaseUrl: "https://github.com/gustav-php/gustav-php.github.io/edit/main/src",
 		githubEditBranch: "main",
 		githubEditPath: "src",
-	},
-	markdown: {
-		headings: { ids: true },
-		autolinks: true,
-		tables: true,
-		tasklists: true,
-		strikethrough: true,
-		tagFilter: true,
-	},
+	}
 };
