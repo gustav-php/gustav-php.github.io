@@ -1,4 +1,6 @@
-export default {
+import { defineConfig } from "docia";
+
+export default defineConfig({
 	srcDir: "src",
 	outDir: "dist",
 	publicDir: "public",
@@ -15,5 +17,5 @@ export default {
 		githubEditBaseUrl: "https://github.com/gustav-php/gustav-php.github.io/edit/main/src",
 		githubEditBranch: "main",
 		githubEditPath: "src",
-	}
-};
+	},
+});
