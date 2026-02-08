@@ -18,14 +18,14 @@ And the `index.latte` can be used like this:
 ```html
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{$title}</title>
-    </head>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{$title}</title>
+	</head>
 
-    <body>
-        {$content}
-    </body>
+	<body>
+		{$content}
+	</body>
 </html>
 ```

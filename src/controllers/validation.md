@@ -1,6 +1,6 @@
 # Validation
 
-Request validation is achieved by the arguments itself. If a argument for `Body` and `Query` has no default value, its required. 
+Request validation is achieved by the arguments itself. If a argument for `Body` and `Query` has no default value, its required.
 
 ```php
 #[Route('/some')]

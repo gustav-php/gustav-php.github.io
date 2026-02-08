@@ -1,0 +1,20 @@
+{
+	"name": "gustav-php.github.io",
+	"private": true,
+	"scripts": {
+		"check": "docia check",
+		"build": "docia build",
+		"dev": "docia dev",
+		"serve": "docia serve",
+		"fmt": "oxfmt",
+		"fmt:check": "oxfmt --check"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"docia": "^0.0.7",
+		"oxfmt": "^0.28.0"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
+}

@@ -1,8 +1,4 @@
-# Sample workflow for building and deploying a mdBook site to GitHub Pages
-#
-# To get started with mdBook see: https://rust-lang.github.io/mdBook/index.html
-#
-name: Deploy mdBook site to Pages
+name: Deploy docs to Pages
 
 on:
     # Runs on pushes targeting the default branch
@@ -25,36 +21,26 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
-    # Build job
     build:
         runs-on: ubuntu-latest
-        env:
-            MDBOOK_VERSION: 0.4.40
         steps:
-            - uses: actions/checkout@v3
-            - name: Install Rust
-              run: |
-                  rustup set profile minimal
-                  rustup toolchain install stable
-                  rustup default stable
-            - name: Install latest mdbook
-              run: |
-                  tag=$(curl 'https://api.github.com/repos/rust-lang/mdbook/releases/latest' | jq -r '.tag_name')
-                  url="https://github.com/rust-lang/mdbook/releases/download/${tag}/mdbook-${tag}-x86_64-unknown-linux-gnu.tar.gz"
-                  mkdir bin
-                  curl -sSL $url | tar -xz --directory=bin
-                  echo "$(pwd)/bin" >> $GITHUB_PATH
+            - uses: actions/checkout@v4
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v2
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
             - name: Setup Pages
               id: pages
-              uses: actions/configure-pages@v3
-            - name: Build with mdBook
-              run: mdbook build
+              uses: actions/configure-pages@v5
+            - name: Validate docs
+              run: bun run check
+            - name: Build with docia
+              run: bun run build
             - name: Upload artifact
-              uses: actions/upload-pages-artifact@v1
+              uses: actions/upload-pages-artifact@v3
               with:
-                  path: ./book
+                  path: ./dist
 
-    # Deployment job
     deploy:
         environment:
             name: github-pages
@@ -64,4 +50,4 @@ jobs:
         steps:
             - name: Deploy to GitHub Pages
               id: deployment
-              uses: actions/deploy-pages@v2
+              uses: actions/deploy-pages@v4
