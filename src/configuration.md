@@ -1,6 +1,6 @@
 # Configuration
 
-Learn how to configure Docus.
+Configure the application when constructing it in `app/index.php`.
 
 ```php
 $configuration = new Configuration(
@@ -8,9 +8,9 @@ $configuration = new Configuration(
     namespace: __NAMESPACE__,
     cache: __DIR__ . '/../cache/',
     files: __DIR__ . '/../public/',
+    views: __DIR__ . '/../views/',
     eventNamespaces: [],
     routeNamespaces: [],
-    serviceNamespaces: [],
     serializerNamespaces: []
 );
 ```
@@ -19,9 +19,9 @@ $configuration = new Configuration(
 | ---------------------- | ------------------------------------------------------- |
 | `mode`                 | Sets the application in development or production.      |
 | `namespace`            | Sets the application namespace for class discovery.     |
-| `cache`                | Absoulute path to the directory used for cache.         |
-| `files`                | Absoulute path to the directory used for static assets. |
+| `cache`                | Absolute path to the directory used for cache.          |
+| `files`                | Absolute path to the directory used for static assets.  |
+| `views`                | Absolute path to the directory used for view templates. |
 | `eventNamespaces`      | Namespace for all additional Event classes.             |
 | `routeNamespaces`      | Namespace for all additional Route classes.             |
-| `serviceNamespaces`    | Namespace for all additional Service classes.           |
 | `serializerNamespaces` | Namespace for all additional Serializer classes.        |

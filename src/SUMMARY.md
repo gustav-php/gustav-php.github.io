@@ -14,5 +14,7 @@
     - [Serialization](./controllers/serialization.md)
 - [Services](./services.md)
 - [Middlewares](./middlewares.md)
+- [Authentication](./authentication.md)
+- [Testing](./testing.md)
 - [Events](./events.md)
 - [Views](./views.md)
