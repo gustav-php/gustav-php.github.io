@@ -1,6 +1,32 @@
 # Response
 
-Every route must return either a Gustav controller response or a PSR-7 `ResponseInterface`.
+Every route declares exactly one response type. Return a typed JSON value with `#[JsonResponse]`, a Gustav `Controller\Response`, or a PSR-7 `ResponseInterface`. Gustav compiles this response metadata when the route is registered.
+
+## Typed JSON
+
+Use `#[JsonResponse]` to return a DTO, array, scalar, backed enum, or nullable value directly:
+
+```php
+use GustavPHP\Gustav\Attribute\{JsonResponse, Route};
+
+final readonly class DogOutput
+{
+    public function __construct(
+        public int $id,
+        public string $name,
+    ) {
+    }
+}
+
+#[Route('/dogs/{id}')]
+#[JsonResponse(headers: ['X-Resource-Type' => 'dog'])]
+public function show(): DogOutput
+{
+    return new DogOutput(42, 'Rex');
+}
+```
+
+Pass `status: 201` for a created response. Gustav supplies `Content-Type: application/json` and recursively normalizes the returned value. See [Serialization](./serialization.md) for supported values, readonly DTOs, enums, exclusions, and failure behavior.
 
 ## HTML
 
@@ -14,9 +40,9 @@ public function index(): Controller\Response
 }
 ```
 
-## JSON
+## JSON helper
 
-Use `json()` with an array or object:
+Use `json()` when the body or status is selected dynamically and the method returns `Controller\Response`:
 
 ```php
 #[Route('/dogs')]
@@ -53,15 +79,15 @@ Use `redirect()` with a destination and, optionally, a status:
 return $this->redirect('/dogs');
 ```
 
-## Serialize
+## Legacy serializer
 
-Use `serialize()` for a configured Gustav serializer:
+Existing `Serializer\Base` classes can still use `serialize()`:
 
 ```php
 return $this->serialize(new Dog());
 ```
 
-See [Serialization](./serialization.md) for serializer configuration.
+New code should prefer plain readonly output DTOs with `#[JsonResponse]`. Both APIs use the same serialization pipeline.
 
 ## PSR-7 response
 
@@ -171,3 +197,5 @@ Production responses never expose unexpected exception messages, class names, fi
 ```
 
 Development mode keeps the debug page for unexpected exceptions and regular `HttpException` instances. A failed request is isolated to that request; the RoadRunner worker continues serving subsequent requests.
+
+Serialization failures, including circular references and unsupported output values, follow this same rule. They never expose DTO class names, property paths, or internal exception messages in production.

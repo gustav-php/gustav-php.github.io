@@ -1,21 +1,22 @@
 # Controllers
 
-Controllers receive requests and return responses. Every controller extends `Controller\Base`, and public handler methods use `#[Route]`:
+Controllers receive requests and return responses. Every controller extends `Controller\Base`, and public handler methods use `#[Route]`. Add `#[JsonResponse]` to return a typed JSON value directly:
 
 ```php
 namespace App\Routes;
 
-use GustavPHP\Gustav\Attribute\Route;
+use GustavPHP\Gustav\Attribute\{JsonResponse, Route};
 use GustavPHP\Gustav\Controller;
 
 final class DogsController extends Controller\Base
 {
     #[Route('/dogs')]
-    public function list(): Controller\Response
+    #[JsonResponse]
+    public function list(): array
     {
-        return $this->json([
+        return [
             ['name' => 'Rex', 'breed' => 'German Shepherd'],
-        ]);
+        ];
     }
 }
 ```
@@ -23,13 +24,14 @@ final class DogsController extends Controller\Base
 Pass a `Method` to register a non-GET route. Typed input attributes bind request data to handler arguments:
 
 ```php
-use GustavPHP\Gustav\Attribute\{Body, Route};
+use GustavPHP\Gustav\Attribute\{Body, JsonResponse, Route};
 use GustavPHP\Gustav\Router\Method;
 
 #[Route('/dogs', Method::POST)]
-public function create(#[Body('name')] string $name): Controller\Response
+#[JsonResponse(status: 201)]
+public function create(#[Body('name')] string $name): array
 {
-    return $this->json(['name' => $name], 201);
+    return ['name' => $name];
 }
 ```
 
