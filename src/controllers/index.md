@@ -1,6 +1,6 @@
 # Controllers
 
-Controllers receive requests and return responses. Every controller extends `Controller\Base`, and public handler methods use `#[Route]`:
+Controllers receive requests and return responses. Every controller extends `Controller\Base`, and public handler methods use `#[Route]`. A supported return type is serialized as JSON automatically:
 
 ```php
 namespace App\Routes;
@@ -11,11 +11,11 @@ use GustavPHP\Gustav\Controller;
 final class DogsController extends Controller\Base
 {
     #[Route('/dogs')]
-    public function list(): Controller\Response
+    public function list(): array
     {
-        return $this->json([
+        return [
             ['name' => 'Rex', 'breed' => 'German Shepherd'],
-        ]);
+        ];
     }
 }
 ```
@@ -29,7 +29,7 @@ use GustavPHP\Gustav\Router\Method;
 #[Route('/dogs', Method::POST)]
 public function create(#[Body('name')] string $name): Controller\Response
 {
-    return $this->json(['name' => $name], 201);
+    return $this->json(['name' => $name], status: 201);
 }
 ```
 

@@ -163,6 +163,8 @@ Input names must match constructor parameter names. Unknown fields are rejected 
 
 Zero-argument DTOs with typed, declared public properties are also supported. Constructor-promoted readonly DTOs are the canonical style because they remain valid immutable objects from the moment they are created. Gustav never creates dynamic properties.
 
+These are input contracts: Gustav hydrates them from client data and reports conversion failures as `422` responses. Returned output DTOs use a separate serialization contract; see [Serialization](./serialization.md).
+
 See [Validation](./validation.md) for attaching rules to DTO fields.
 
 ## JSON and form bodies

@@ -14,18 +14,16 @@ class Police extends Service\Base
 To inject a service into a controller, you need to add the desired service to the controllers constructor.
 
 ```php
-use DI\Attribute\Inject;
-
 class DogsController extends Controller\Base
 {
-    public function __construcst(protected Police $police)
+    public function __construct(protected Police $police)
     {
     }
 
     #[Route('/police')]
-    public function police()
+    public function police(): Controller\Response
     {
-        return $this->police->icon;
+        return $this->plaintext($this->police->icon);
     }
 }
 ```

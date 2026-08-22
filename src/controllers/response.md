@@ -1,6 +1,31 @@
 # Response
 
-Every route must return either a Gustav controller response or a PSR-7 `ResponseInterface`.
+Every route declares exactly one response type. Gustav and PSR-7 response objects pass through unchanged; any other supported declared type is serialized as JSON. Gustav compiles that decision when the route is registered.
+
+## Typed JSON
+
+Return a DTO, array, scalar, backed enum, or nullable value directly. No response marker is required:
+
+```php
+use GustavPHP\Gustav\Attribute\Route;
+
+final readonly class DogOutput
+{
+    public function __construct(
+        public int $id,
+        public string $name,
+    ) {
+    }
+}
+
+#[Route('/dogs/{id}')]
+public function show(): DogOutput
+{
+    return new DogOutput(42, 'Rex');
+}
+```
+
+Gustav returns status `200`, supplies `Content-Type: application/json`, and recursively normalizes the value. See [Serialization](./serialization.md) for supported values, readonly DTOs, enums, exclusions, and failure behavior.
 
 ## HTML
 
@@ -14,18 +39,20 @@ public function index(): Controller\Response
 }
 ```
 
-## JSON
+## JSON helper
 
-Use `json()` with an array or object:
+Use `json()` when the body is selected dynamically or the response needs a non-default status or custom headers:
 
 ```php
-#[Route('/dogs')]
-public function index(): Controller\Response
+use GustavPHP\Gustav\Router\Method;
+
+#[Route('/dogs', Method::POST)]
+public function create(): Controller\Response
 {
     return $this->json([
         'name' => 'Rex',
         'age' => 4,
-    ]);
+    ], status: 201, headers: ['X-Resource-Type' => 'dog']);
 }
 ```
 
@@ -53,15 +80,15 @@ Use `redirect()` with a destination and, optionally, a status:
 return $this->redirect('/dogs');
 ```
 
-## Serialize
+## Legacy serializer
 
-Use `serialize()` for a configured Gustav serializer:
+Existing `Serializer\Base` classes can still use `serialize()`:
 
 ```php
 return $this->serialize(new Dog());
 ```
 
-See [Serialization](./serialization.md) for serializer configuration.
+New code should prefer returning plain readonly output DTOs directly. Both APIs use the same serialization pipeline.
 
 ## PSR-7 response
 
@@ -171,3 +198,5 @@ Production responses never expose unexpected exception messages, class names, fi
 ```
 
 Development mode keeps the debug page for unexpected exceptions and regular `HttpException` instances. A failed request is isolated to that request; the RoadRunner worker continues serving subsequent requests.
+
+Serialization failures, including circular references and unsupported output values, follow this same rule. They never expose DTO class names, property paths, or internal exception messages in production.

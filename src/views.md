@@ -4,7 +4,7 @@ Views are powered by the [Latte](https://latte.nette.org) template engine and ca
 
 ```php
 #[Route('/')]
-public function index()
+public function index(): Controller\Response
 {
     return $this->view(__DIR__ . '/../views/index.latte', [
         'title' => 'lorem ipsum',
