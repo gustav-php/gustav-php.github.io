@@ -40,8 +40,10 @@ use GustavPHP\Gustav\Auth\Authenticator;
 use GustavPHP\Gustav\Auth\BearerAuth;
 use GustavPHP\Gustav\Auth\Exception\UnauthorizedException;
 use GustavPHP\Gustav\Auth\Identity;
+use GustavPHP\Gustav\Attribute\Service;
 use Psr\Http\Message\ServerRequestInterface;
 
+#[Service(as: Authenticator::class)]
 class TokenAuthenticator implements Authenticator
 {
     public function __construct(
@@ -66,17 +68,9 @@ class TokenAuthenticator implements Authenticator
 }
 ```
 
-Bind the application authenticator, then attach the injectable authentication
+The `#[Service]` attribute makes `TokenAuthenticator` the discovered
+implementation of `Authenticator`. Attach the injectable authentication
 middleware to a controller or individual route:
-
-```php
-use GustavPHP\Gustav\Auth\Authenticator;
-
-$app->services()->bind(
-    Authenticator::class,
-    TokenAuthenticator::class,
-);
-```
 
 ```php
 use GustavPHP\Gustav\Attribute\{AuthUser, Middleware, Route};

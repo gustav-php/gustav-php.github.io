@@ -60,20 +60,30 @@ Responses pass back through the same middleware in reverse order.
 
 ## Application-wide middleware
 
-Register middleware that should wrap every request on the application:
+Mark middleware that should wrap every request with `#[GlobalMiddleware]`.
+Gustav discovers it from the application's `Middlewares` namespace:
 
 ```php
-$app = new Application($configuration);
-$app->addMiddleware(RequestIdMiddleware::class);
+use GustavPHP\Gustav\Attribute\GlobalMiddleware;
+use GustavPHP\Gustav\Middleware\Base;
+
+#[GlobalMiddleware(priority: -100)]
+final class RequestIdMiddleware extends Base
+{
+    // ...
+}
 ```
 
-Application-wide middleware is also resolved through the service container.
+Lower priorities run earlier on the way in and later on the way out.
+Application-wide middleware is resolved through the service container without
+entrypoint registration.
 
 ## Injecting middleware dependencies
 
 Middleware can constructor-inject services just like controllers:
 
 ```php
+use GustavPHP\Gustav\Attribute\Service;
 use GustavPHP\Gustav\Middleware\Base;
 
 final class RequireApiKey extends Base
@@ -93,13 +103,17 @@ final class RequireApiKey extends Base
     }
 }
 
-$app->services()->bind(ApiKeyVerifier::class, DatabaseApiKeyVerifier::class);
+#[Service(as: ApiKeyVerifier::class)]
+final class DatabaseApiKeyVerifier implements ApiKeyVerifier
+{
+    // ...
+}
 ```
 
-Middleware uses its service registration lifetime. An unregistered middleware
-class is autowired once per request. Register it with `transient()` to create a
-fresh instance for each occurrence, or `singleton()` only when sharing that
-instance between RoadRunner requests is intentional and safe.
+Application-wide middleware is request-scoped by default. Set `lifetime:` on
+`#[GlobalMiddleware]` when a transient or singleton instance is intentional.
+Controller and route middleware classes are also autowired once per request
+unless an advanced programmatic definition overrides their lifetime.
 
 ## Request-only middleware
 

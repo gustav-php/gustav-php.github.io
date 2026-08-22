@@ -12,6 +12,8 @@ $configuration = new Configuration(
     eventNamespaces: [],
     routeNamespaces: [],
     serializerNamespaces: [],
+    serviceNamespaces: [],
+    middlewareNamespaces: [],
 );
 ```
 
@@ -25,18 +27,18 @@ $configuration = new Configuration(
 | `eventNamespaces`      | Namespace for all additional Event classes.             |
 | `routeNamespaces`      | Namespace for all additional Route classes.             |
 | `serializerNamespaces` | Namespace for all additional Serializer classes.        |
+| `serviceNamespaces`    | Namespace for additional `#[Service]` classes.          |
+| `middlewareNamespaces` | Namespace for additional `#[GlobalMiddleware]` classes. |
 
-Construct the application, register services and application middleware, and
-then start request handling. Service registration is frozen by the first call
-to `handle()` or `start()`.
+Gustav automatically discovers routes, services, middleware, serializers, and
+events from their conventional namespaces under the application namespace.
+The additional namespace arrays are useful for modules outside that structure.
+
+Construct the application and start request handling; ordinary projects do not
+need imperative registration calls in their entrypoint:
 
 ```php
 $app = new Application($configuration);
-
-$app->services()
-    ->bind(UserRepository::class, SqlUserRepository::class);
-
-$app->addMiddleware(RequestIdMiddleware::class);
 $app->start();
 ```
 

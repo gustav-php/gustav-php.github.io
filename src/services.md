@@ -5,11 +5,14 @@ container. Services are ordinary PHP classes; they do not need to extend a
 framework base class.
 
 ```php
+use GustavPHP\Gustav\Attribute\Service;
+
 interface DogRepository
 {
     public function findAll(): array;
 }
 
+#[Service(as: DogRepository::class)]
 final class SqlDogRepository implements DogRepository
 {
     public function __construct(private readonly PDO $database)
@@ -23,30 +26,14 @@ final class SqlDogRepository implements DogRepository
 }
 ```
 
-Register application services after constructing `Application` and before
-calling `handle()` or `start()`:
+Gustav recursively discovers `#[Service]` classes under your application's
+`Services` namespace. `as` connects an interface or abstract class to that
+implementation. Request scope is the default, so no lifetime argument is
+needed for most repositories and application services.
 
-```php
-use GustavPHP\Gustav\Service\Container;
-
-$app = new Application($configuration);
-
-$app->services()
-    ->singleton(PDO::class, function (Container $services): PDO {
-        $database = $services->get(DatabaseConfiguration::class);
-
-        return new PDO($database->dsn, $database->username, $database->password);
-    })
-    ->bind(DogRepository::class, SqlDogRepository::class);
-```
-
-`bind()` connects an interface or abstract class to a concrete implementation.
-Its default lifetime is request-scoped. A factory may accept no arguments or
-the active `Container`; invalid factory signatures are rejected during
-registration.
-
-The container is frozen when request handling begins. Registering another
-service after the first request is an application configuration error.
+Concrete classes with the default request lifetime need no attribute at all;
+Gustav autowires them when they are first requested. Use `#[Service]` when you
+need an interface binding or a different lifetime.
 
 ## Constructor injection
 
@@ -80,34 +67,27 @@ configuration errors that identify the affected service chain.
 
 Choose a lifetime based on how long service state is safe to retain:
 
-| Registration  | Lifetime                                                                      |
-| ------------- | ----------------------------------------------------------------------------- |
-| `singleton()` | One instance for the application process, shared by every RoadRunner request. |
-| `request()`   | One instance during a request, released even when that request fails.         |
-| `transient()` | A new instance on every resolution.                                           |
-| `bind()`      | Request-scoped unless a different `Lifetime` is passed.                       |
+| Lifetime              | Behavior                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `Lifetime::Singleton` | One instance for the application process, shared by every RoadRunner request.              |
+| `Lifetime::Request`   | One instance during a request, released even when that request fails. This is the default. |
+| `Lifetime::Transient` | A new instance on every resolution.                                                        |
 
 ```php
+use GustavPHP\Gustav\Attribute\Service;
 use GustavPHP\Gustav\Service\Lifetime;
 
-$services = $app->services();
+#[Service(lifetime: Lifetime::Singleton)]
+final class DatabaseConfiguration {}
 
-$services
-    ->singleton(DatabaseConfiguration::class, $databaseConfiguration)
-    ->request(RequestContext::class)
-    ->transient(CommandHandler::class)
-    ->bind(
-        Cache::class,
-        RedisCache::class,
-        Lifetime::Singleton,
-    );
+#[Service(as: Cache::class, lifetime: Lifetime::Singleton)]
+final class RedisCache implements Cache {}
+
+#[Service(lifetime: Lifetime::Transient)]
+final class CommandHandler {}
 ```
 
-Only `singleton()` accepts an existing object. Request and transient services
-must use an autowired class or factory so the container can create the correct
-number of instances.
-
-Singleton factories run outside any request scope. They cannot resolve
+Singleton services are created outside any request scope. They cannot resolve
 request-scoped services, preventing a singleton from accidentally retaining
 the first request or user for the lifetime of a RoadRunner worker.
 
@@ -125,8 +105,6 @@ final readonly class RequestContext
     ) {
     }
 }
-
-$app->services()->request(RequestContext::class);
 ```
 
 Gustav automatically provides these framework services:
@@ -138,3 +116,40 @@ Gustav automatically provides these framework services:
 Prefer injecting the specific dependency a class needs. Inject the container
 itself mainly in service factories or infrastructure that genuinely performs
 dynamic service lookup.
+
+## Service providers
+
+Discovery covers ordinary application classes. Use the programmatic registry
+inside a discovered service provider when a dependency cannot be expressed as
+an autowired class, such as a third-party object requiring scalar
+configuration:
+
+```php
+use GustavPHP\Gustav\Service\{Container, Provider};
+
+final class InfrastructureProvider implements Provider
+{
+    public function register(Container $services): void
+    {
+        $services->singleton(
+            PDO::class,
+            function (Container $services): PDO {
+                $database = $services->get(DatabaseConfiguration::class);
+
+                return new PDO(
+                    $database->dsn,
+                    $database->username,
+                    $database->password,
+                );
+            },
+        );
+    }
+}
+```
+
+Place providers under the application `Services` namespace. Gustav discovers
+them and calls `register()` during startup, so the application entrypoint stays
+declarative. Providers must have a public zero-argument constructor.
+
+The registry exposes `bind()`, `singleton()`, `request()`, and `transient()` for
+dynamic application composition. It is frozen when request handling begins.
