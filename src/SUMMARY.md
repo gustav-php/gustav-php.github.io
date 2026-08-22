@@ -12,7 +12,7 @@
     - [Validation](./controllers/validation.md)
     - [Response](./controllers/response.md)
     - [Serialization](./controllers/serialization.md)
-- [Services](./services.md)
+- [Application services](./services.md)
 - [Middlewares](./middlewares.md)
 - [Authentication](./authentication.md)
 - [Testing](./testing.md)

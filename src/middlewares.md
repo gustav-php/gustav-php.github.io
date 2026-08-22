@@ -30,19 +30,22 @@ class TimingMiddleware extends Base
 ## Controller and route middleware
 
 Attach middleware to a controller to run it for every route in that class.
-Attach it to a route method for one endpoint. The attribute is repeatable.
+Attach it to a route method for one endpoint. The attribute is repeatable and
+takes a middleware class name. Gustav compiles this metadata when routes are
+registered and resolves the middleware through the application container for
+each request.
 
 ```php
 use GustavPHP\Gustav\Attribute\Middleware;
 
-#[Middleware(new RequestIdMiddleware())]
+#[Middleware(RequestIdMiddleware::class)]
 class DogsController extends Controller\Base
 {
     #[Route('/dogs')]
-    #[Middleware(new TimingMiddleware())]
-    public function list(): Controller\Response
+    #[Middleware(TimingMiddleware::class)]
+    public function list(): array
     {
-        return $this->json([]);
+        return [];
     }
 }
 ```
@@ -61,8 +64,42 @@ Register middleware that should wrap every request on the application:
 
 ```php
 $app = new Application($configuration);
-$app->addMiddleware(new RequestIdMiddleware());
+$app->addMiddleware(RequestIdMiddleware::class);
 ```
+
+Application-wide middleware is also resolved through the service container.
+
+## Injecting middleware dependencies
+
+Middleware can constructor-inject services just like controllers:
+
+```php
+use GustavPHP\Gustav\Middleware\Base;
+
+final class RequireApiKey extends Base
+{
+    public function __construct(
+        private readonly ApiKeyVerifier $keys,
+    ) {
+    }
+
+    public function process(
+        ServerRequestInterface $request,
+        RequestHandlerInterface $handler,
+    ): ResponseInterface {
+        $this->keys->verify($request->getHeaderLine('X-API-Key'));
+
+        return $handler->handle($request);
+    }
+}
+
+$app->services()->bind(ApiKeyVerifier::class, DatabaseApiKeyVerifier::class);
+```
+
+Middleware uses its service registration lifetime. An unregistered middleware
+class is autowired once per request. Register it with `transient()` to create a
+fresh instance for each occurrence, or `singleton()` only when sharing that
+instance between RoadRunner requests is intentional and safe.
 
 ## Request-only middleware
 

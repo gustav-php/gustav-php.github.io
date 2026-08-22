@@ -44,6 +44,11 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class TokenAuthenticator implements Authenticator
 {
+    public function __construct(
+        private readonly UserRepository $users,
+    ) {
+    }
+
     public function authenticate(ServerRequestInterface $request): Identity
     {
         $credentials = BearerAuth::fromRequest($request);
@@ -61,7 +66,17 @@ class TokenAuthenticator implements Authenticator
 }
 ```
 
-Attach the authentication middleware to a controller or individual route:
+Bind the application authenticator, then attach the injectable authentication
+middleware to a controller or individual route:
+
+```php
+use GustavPHP\Gustav\Auth\Authenticator;
+
+$app->services()->bind(
+    Authenticator::class,
+    TokenAuthenticator::class,
+);
+```
 
 ```php
 use GustavPHP\Gustav\Attribute\{AuthUser, Middleware, Route};
@@ -71,16 +86,20 @@ use GustavPHP\Gustav\Auth\Identity;
 class AccountController extends Controller\Base
 {
     #[Route('/account')]
-    #[Middleware(new AuthenticationMiddleware(new TokenAuthenticator()))]
-    public function account(#[AuthUser] Identity $identity): Controller\Response
+    #[Middleware(AuthenticationMiddleware::class)]
+    public function account(#[AuthUser] Identity $identity): array
     {
-        return $this->json([
+        return [
             'id' => $identity->getIdentifier(),
             'roles' => $identity->getRoles(),
-        ]);
+        ];
     }
 }
 ```
+
+`AuthenticationMiddleware` receives the configured `Authenticator` through
+constructor injection. The authenticator can inject repositories, database
+clients, or other application services in the same way.
 
 Missing or invalid Basic and Bearer credentials produce a `401` response with
 the corresponding `WWW-Authenticate` challenge. `#[AuthUser]` also produces a
