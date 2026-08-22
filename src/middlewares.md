@@ -30,19 +30,22 @@ class TimingMiddleware extends Base
 ## Controller and route middleware
 
 Attach middleware to a controller to run it for every route in that class.
-Attach it to a route method for one endpoint. The attribute is repeatable.
+Attach it to a route method for one endpoint. The attribute is repeatable and
+takes a middleware class name. Gustav compiles this metadata when routes are
+registered and resolves the middleware through the application container for
+each request.
 
 ```php
 use GustavPHP\Gustav\Attribute\Middleware;
 
-#[Middleware(new RequestIdMiddleware())]
+#[Middleware(RequestIdMiddleware::class)]
 class DogsController extends Controller\Base
 {
     #[Route('/dogs')]
-    #[Middleware(new TimingMiddleware())]
-    public function list(): Controller\Response
+    #[Middleware(TimingMiddleware::class)]
+    public function list(): array
     {
-        return $this->json([]);
+        return [];
     }
 }
 ```
@@ -57,12 +60,60 @@ Responses pass back through the same middleware in reverse order.
 
 ## Application-wide middleware
 
-Register middleware that should wrap every request on the application:
+Mark middleware that should wrap every request with `#[GlobalMiddleware]`.
+Gustav discovers it from the application's `Middlewares` namespace:
 
 ```php
-$app = new Application($configuration);
-$app->addMiddleware(new RequestIdMiddleware());
+use GustavPHP\Gustav\Attribute\GlobalMiddleware;
+use GustavPHP\Gustav\Middleware\Base;
+
+#[GlobalMiddleware(priority: -100)]
+final class RequestIdMiddleware extends Base
+{
+    // ...
+}
 ```
+
+Lower priorities run earlier on the way in and later on the way out.
+Application-wide middleware is resolved through the service container without
+entrypoint registration.
+
+## Injecting middleware dependencies
+
+Middleware can constructor-inject services just like controllers:
+
+```php
+use GustavPHP\Gustav\Attribute\Service;
+use GustavPHP\Gustav\Middleware\Base;
+
+final class RequireApiKey extends Base
+{
+    public function __construct(
+        private readonly ApiKeyVerifier $keys,
+    ) {
+    }
+
+    public function process(
+        ServerRequestInterface $request,
+        RequestHandlerInterface $handler,
+    ): ResponseInterface {
+        $this->keys->verify($request->getHeaderLine('X-API-Key'));
+
+        return $handler->handle($request);
+    }
+}
+
+#[Service(as: ApiKeyVerifier::class)]
+final class DatabaseApiKeyVerifier implements ApiKeyVerifier
+{
+    // ...
+}
+```
+
+Application-wide middleware is request-scoped by default. Set `lifetime:` on
+`#[GlobalMiddleware]` when a transient or singleton instance is intentional.
+Controller and route middleware classes are also autowired once per request
+unless an advanced programmatic definition overrides their lifetime.
 
 ## Request-only middleware
 

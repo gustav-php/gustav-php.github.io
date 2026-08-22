@@ -33,4 +33,4 @@ The `src/` directory contains all the components that build your application:
 - `Middlewares/` contains all Middlewares
 - `Routes/` contains all Routes
 - `Serializers/` contains all Serializers
-- `Serives/` contains all Services
+- `Services/` contains application services and their implementations
