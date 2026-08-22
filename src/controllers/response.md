@@ -1,81 +1,86 @@
 # Response
 
-All routes should return a response to be sent back to the user. GustavPHP provides several different ways to return responses.
+Every route must return either a Gustav controller response or a PSR-7 `ResponseInterface`.
 
 ## HTML
 
-HTML response is used to return HTML content to the user's browser. This is useful when you want to render a web page with dynamic content. To return an HTML response, you can use the `html(...)` method of your controller.
+Use `html()` to return HTML content:
 
 ```php
 #[Route('/html')]
-public function index()
+public function index(): Controller\Response
 {
-    return $this->html("<h1>Hello World!</h1>");
+    return $this->html('<h1>Hello World!</h1>');
 }
 ```
 
 ## JSON
 
-You can return JSON using the `json(...)` method of your controller.
+Use `json()` with an array or object:
 
 ```php
-#[Route('/json')]
-public function index()
+#[Route('/dogs')]
+public function index(): Controller\Response
 {
     return $this->json([
-        'name' => 'Torsten',
-        'age' => 30,
-        'company' => 'Appwrite'
+        'name' => 'Rex',
+        'age' => 4,
     ]);
 }
 ```
 
-## XML
+## Plain text
 
-You can return XML using the `xml(...)` method of your controller.
+Use `plaintext()` for a text response:
 
 ```php
-#[Route('/xml')]
-public function index()
-{
-    return $this->xml("<note>Hello World!</note>");
-}
+return $this->plaintext('ready');
+```
+
+## XML
+
+Use `xml()` for XML content:
+
+```php
+return $this->xml('<status>ready</status>');
 ```
 
 ## Redirect
 
-You can perform a HTTP redirect using the `redirect(...)` method of your controller.
+Use `redirect()` with a destination and, optionally, a status:
 
 ```php
-#[Route('/redirect')]
-public function index()
-{
-    return $this->redirect("/json");
-}
+return $this->redirect('/dogs');
 ```
 
 ## Serialize
 
-You can serialize your response payload using the `serialize(...)` method of your controller.
+Use `serialize()` for a configured Gustav serializer:
 
 ```php
-#[Route('/serialize')]
-public function index()
+return $this->serialize(new Dog());
+```
+
+See [Serialization](./serialization.md) for serializer configuration.
+
+## PSR-7 response
+
+A controller may return a PSR-7 response directly:
+
+```php
+use Nyholm\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+
+#[Route('/accepted')]
+public function accepted(): ResponseInterface
 {
-    return $this->serialize(new Cat());
+    return new Response(202, ['Content-Type' => 'text/plain'], 'accepted');
 }
 ```
 
-You can find out more about Serialization [here](./serialization.md).
-
-## View
-
-_tbd_
-
 ## HTTP errors
 
-Throw `Http\Exception\HttpException` when a request should fail with a specific
-HTTP status and optional headers:
+Throw `HttpException` when application code intentionally needs an HTTP error status and optional headers:
 
 ```php
 use GustavPHP\Gustav\Http\Exception\HttpException;
@@ -87,7 +92,82 @@ throw new HttpException(
 );
 ```
 
-In production, Gustav returns a JSON error document and hides messages from
-unexpected server exceptions. In development, the same exception is rendered
-with the debug page. Authentication exceptions use this mechanism for `401`
-and `403` responses.
+In production this becomes:
+
+```json
+{
+	"error": {
+		"status": 404,
+		"message": "Dog not found"
+	}
+}
+```
+
+Authentication exceptions use this mechanism for `401` and `403` responses.
+
+Do not encode an HTTP status in a generic exception's numeric code. Only typed `HttpException` instances control the response status; an unexpected exception such as `new RuntimeException('failure', 422)` is still a `500`.
+
+## Request input errors
+
+Gustav uses three statuses for request binding:
+
+| Status | Meaning                                                                                      |
+| ------ | -------------------------------------------------------------------------------------------- |
+| `400`  | Malformed request syntax, including invalid JSON                                             |
+| `415`  | A raw body has an unsupported media type                                                     |
+| `422`  | Well-formed input cannot satisfy required fields, PHP types, enum cases, or validation rules |
+
+A validation response contains every detected field violation:
+
+```json
+{
+	"error": {
+		"status": 422,
+		"message": "Validation failed",
+		"violations": [
+			{
+				"source": "body",
+				"path": "email",
+				"code": "invalid_email",
+				"message": "Email is invalid"
+			},
+			{
+				"source": "body",
+				"path": "age",
+				"code": "min_value",
+				"message": "Value must be greater than or equal to 0"
+			}
+		]
+	}
+}
+```
+
+`source` identifies `body`, `query`, `param`, `header`, `cookie`, or controller-side validation. Nested paths use dot notation. Messages attached to expected request errors are safe to show to clients.
+
+Malformed JSON has no field violations:
+
+```json
+{
+	"error": {
+		"status": 400,
+		"message": "Malformed JSON body"
+	}
+}
+```
+
+Typed request-input exceptions use this JSON format in both development and production.
+
+## Unexpected exceptions
+
+Production responses never expose unexpected exception messages, class names, files, or traces:
+
+```json
+{
+	"error": {
+		"status": 500,
+		"message": "Server Error"
+	}
+}
+```
+
+Development mode keeps the debug page for unexpected exceptions and regular `HttpException` instances. A failed request is isolated to that request; the RoadRunner worker continues serving subsequent requests.

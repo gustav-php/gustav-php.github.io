@@ -1,135 +1,178 @@
-# Request
+# Request input
 
-Handlers often need access to the client request details. GustavPHP provides access to the request object of the underlying server. We can access the request object by instructing the framework to inject it by adding the `GustavPHP\Gustav\Attribute\Request` attribute to the method's signature.
+Controller arguments can bind directly to an HTTP request. Add one input attribute to each argument and declare the PHP type Gustav should produce. Route signatures are checked when the application registers the route, and their binding metadata is reused for every request.
+
+| Attribute     | Input                    |
+| ------------- | ------------------------ |
+| `#[Body]`     | Parsed form or JSON body |
+| `#[Query]`    | Query string             |
+| `#[Param]`    | Route placeholder        |
+| `#[Header]`   | Request header           |
+| `#[Cookie]`   | Cookie                   |
+| `#[Request]`  | PSR-7 server request     |
+| `#[AuthUser]` | Authenticated identity   |
+
+## PSR-7 request
+
+Use `#[Request]` when a handler needs the complete request instead of a bound value:
 
 ```php
-use GustavPHP\Gustav\Attribute\Request;
+use GustavPHP\Gustav\Attribute\{Request, Route};
 use Psr\Http\Message\ServerRequestInterface;
 
 #[Route('/dogs')]
-public function list(#[Request] ServerRequestInterface $request)
-```
-
-## Query Parameters
-
-Query parameters are a common way to pass data to a server through a URL. In the context of the GustavPHP framework, query parameters can be accessed through the request object's `getQueryParams()` method or the `GustavPHP\Gustav\Attribute\Query` attribute.
-
-Using the request object:
-
-```php
-#[Route('/dog')]
-public function get(#[Request] ServerRequestInterface $request) {
-    $query = $request->getQueryParams();
-    $id = $query['id'];
-}
-```
-
-Using the attribute:
-
-```php
-#[Route('/dog')]
-public function get(#[Query] array $query) {
-    $id = $query['id'];
-}
-```
-
-You can also pass the key in order to get the desired query parameter:
-
-```php
-#[Route('/dog')]
-public function get(#[Query('id')] string $id) {
-    // Use the value of the `?id=` query parameter
-}
-```
-
-## Body
-
-The request body is a part of an HTTP request that contains data that is sent from the client to the server. In the context of the GustavPHP framework, the request body can be accessed through the request object's `getBody()` method or the `GustavPHP\Gustav\Attribute\Body` attribute.
-
-Using the request object:
-
-```php
-#[Route('/dog', Method::POST)]
-public function create(#[Request] ServerRequestInterface $request) {
-    $body = $request->getBody();
-    $name = $body['name'];
-}
-```
-
-Using the attribute:
-
-```php
-#[Route('/dog', Method::POST)]
-public function create(#[Body] array $body) {
-    $id = $query['id'];
-}
-```
-
-You can also pass the key in order to get the desired query parameter:
-
-```php
-#[Route('/dog', Method::POST)]
-public function create(#[Body('name')] string $name) {
-    // Use the value of the `name` query parameter
-}
-```
-
-## Header
-
-HTTP headers are additional pieces of information that are sent along with an HTTP request or response, providing metadata about the request or response. In the context of the GustavPHP framework, the request body can be accessed through the request object's `getHeader($name)` method or the `GustavPHP\Gustav\Attribute\Header` attribute.
-
-Using the request object:
-
-```php
-#[Route('/dog')]
-public function get(#[Request] ServerRequestInterface $request) {
-    $userAgent = $request->getHeader('User-Agent');
-}
-```
-
-Using the attribute:
-
-```php
-#[Route('/dog')]
-public function get(#[Header] array $headers) {
-    $userAgent = $headers['User-Agent'];
-}
-```
-
-You can also pass the key in order to get the desired query parameter:
-
-```php
-#[Route('/dog')]
-public function get(#[Header('User-Agent')] string $userAgent) {
-    // Use the value of the `name` query parameter
-}
-```
-
-## Data Transfer Object
-
-In order to avoid 10+ arguments for more complex payloads, you can also set the data type from arguments used with the `Query` and `Body` attributes to a class.
-
-Every public property will be used as a param. Properties with a default value are flagged as optional.
-
-```php
-class DogDto
+public function list(#[Request] ServerRequestInterface $request): Controller\Response
 {
-    public string $name;
-    public string $breed;
-    public bool $cute = true;
+    return $this->json([
+        'method' => $request->getMethod(),
+        'query' => $request->getQueryParams(),
+    ]);
 }
 ```
 
-This class can now be used as a DTO like this:
+The parameter must accept `ServerRequestInterface` or a compatible parent interface.
+
+## Binding one value
+
+Pass a key or name to bind one value from a source:
 
 ```php
-#[Route('/dog')]
-public function get(#[Query] DogDto $dogDto) {
+use GustavPHP\Gustav\Attribute\{Body, Cookie, Header, Param, Query, Route};
+use GustavPHP\Gustav\Router\Method;
 
-}
-
-#[Route('/dog', Method::POST)]
-public function create(#[Body] DogDto $dogDto) {
-
+#[Route('/dogs/{id}', Method::POST)]
+public function update(
+    #[Param('id')] int $id,
+    #[Query('notify')] bool $notify,
+    #[Header('If-Match')] string $version,
+    #[Cookie('locale')] string $locale,
+    #[Body('name')] string $name,
+): Controller\Response {
+    // All values have already been converted to their declared PHP types.
+    return $this->json(compact('id', 'notify', 'version', 'locale', 'name'));
 }
 ```
+
+The PHP argument name does not need to match the external name. In the example, `#[Header('If-Match')] string $version` binds the `If-Match` header to `$version`.
+
+Omit the key to receive the complete source as an array:
+
+```php
+#[Route('/dogs')]
+public function list(
+    #[Query] array $query,
+    #[Header] array $headers,
+    #[Cookie] array $cookies,
+): Controller\Response {
+    return $this->json(compact('query', 'headers', 'cookies'));
+}
+```
+
+`#[Param] array $params` similarly returns all route placeholders, while `#[Body] array $body` returns the complete parsed body.
+
+## Required, optional, and nullable values
+
+A keyed argument without a PHP default is required. Give the argument a default to make omission valid:
+
+```php
+#[Route('/dogs')]
+public function list(
+    #[Query('page')] int $page = 1,
+    #[Query('archived')] bool $archived = false,
+): Controller\Response {
+    // If either key is absent, PHP supplies its declared default.
+}
+```
+
+Omission and `null` are different states. A nullable type permits an explicit `null`, but it is still required unless it also has a default:
+
+```php
+#[Body('nickname')] ?string $nickname,        // required; null is accepted
+#[Body('note')] ?string $note = null,         // optional; omission uses null
+#[Body('name')] string $name,                 // required; null is rejected
+```
+
+Missing required input, disallowed `null`, and conversion failures produce a structured `422` response instead of reaching the controller.
+
+## Type conversion
+
+Gustav converts only the following request types. It rejects ambiguous unions such as `int|string` when registering the route.
+
+| PHP type    | Accepted input                                          |
+| ----------- | ------------------------------------------------------- |
+| `string`    | A string                                                |
+| `int`       | An integer or valid integer string, including `"0"`     |
+| `float`     | A finite integer, float, or numeric string              |
+| `bool`      | `true`, `false`, `1`, `0`, or the corresponding strings |
+| `array`     | An array                                                |
+| `?T`        | The values accepted by `T`, plus explicit `null`        |
+| backed enum | A valid value of its string or integer backing type     |
+
+Conversion is deterministic: arrays are not coerced to strings, arbitrary objects are not cast, and invalid enum values are rejected.
+
+## Constructor-based DTOs
+
+Use a constructor-promoted, readonly DTO for a body or query object. Constructor defaults become input defaults, and the constructor runs only after every field has converted and validated successfully.
+
+```php
+enum DogSize: string
+{
+    case Small = 'small';
+    case Medium = 'medium';
+    case Large = 'large';
+}
+
+final readonly class CreateDogInput
+{
+    public function __construct(
+        public string $name,
+        public int $age,
+        public bool $vaccinated,
+        public DogSize $size,
+        public ?string $nickname,
+        public string $breed = 'mixed',
+    ) {
+    }
+}
+```
+
+Bind the DTO from either source:
+
+```php
+#[Route('/dogs', Method::POST)]
+public function create(#[Body] CreateDogInput $input): Controller\Response
+{
+    return $this->json([
+        'name' => $input->name,
+        'age' => $input->age,
+        'vaccinated' => $input->vaccinated,
+        'size' => $input->size->value,
+        'nickname' => $input->nickname,
+        'breed' => $input->breed,
+    ], 201);
+}
+
+#[Route('/dogs')]
+public function list(#[Query] DogSearchInput $input): Controller\Response
+{
+    // Query-string scalar values are converted before construction.
+}
+```
+
+Input names must match constructor parameter names. Unknown fields are rejected by default, required constructor parameters must be present, and omitted parameters with defaults retain those defaults. Supported DTO field types are the same scalar, array, nullable, and backed-enum types listed above. Nested DTO collections are not inferred; bind them as arrays and map them explicitly.
+
+Zero-argument DTOs with typed, declared public properties are also supported. Constructor-promoted readonly DTOs are the canonical style because they remain valid immutable objects from the moment they are created. Gustav never creates dynamic properties.
+
+See [Validation](./validation.md) for attaching rules to DTO fields.
+
+## JSON and form bodies
+
+`#[Body]` first uses a parsed body supplied by the PSR-7 server. If no parsed body exists, Gustav can read:
+
+- `application/json`
+- any `application/*+json` media type, such as `application/problem+json`
+- `application/x-www-form-urlencoded`
+
+Server-parsed multipart and regular form bodies continue to work. Reading a raw body preserves the position of a seekable PSR-7 stream.
+
+Malformed JSON returns `400`. A non-empty raw body with an unsupported media type returns `415` when body binding is required. Syntactically valid JSON that cannot satisfy the declared PHP types returns `422`. See [Responses](./response.md#request-input-errors) for the JSON error format.
