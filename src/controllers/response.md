@@ -1,13 +1,13 @@
 # Response
 
-Every route declares exactly one response type. Return a typed JSON value with `#[JsonResponse]`, a Gustav `Controller\Response`, or a PSR-7 `ResponseInterface`. Gustav compiles this response metadata when the route is registered.
+Every route declares exactly one response type. Gustav and PSR-7 response objects pass through unchanged; any other supported declared type is serialized as JSON. Gustav compiles that decision when the route is registered.
 
 ## Typed JSON
 
-Use `#[JsonResponse]` to return a DTO, array, scalar, backed enum, or nullable value directly:
+Return a DTO, array, scalar, backed enum, or nullable value directly. No response marker is required:
 
 ```php
-use GustavPHP\Gustav\Attribute\{JsonResponse, Route};
+use GustavPHP\Gustav\Attribute\Route;
 
 final readonly class DogOutput
 {
@@ -19,14 +19,13 @@ final readonly class DogOutput
 }
 
 #[Route('/dogs/{id}')]
-#[JsonResponse(headers: ['X-Resource-Type' => 'dog'])]
 public function show(): DogOutput
 {
     return new DogOutput(42, 'Rex');
 }
 ```
 
-Pass `status: 201` for a created response. Gustav supplies `Content-Type: application/json` and recursively normalizes the returned value. See [Serialization](./serialization.md) for supported values, readonly DTOs, enums, exclusions, and failure behavior.
+Gustav returns status `200`, supplies `Content-Type: application/json`, and recursively normalizes the value. See [Serialization](./serialization.md) for supported values, readonly DTOs, enums, exclusions, and failure behavior.
 
 ## HTML
 
@@ -42,16 +41,18 @@ public function index(): Controller\Response
 
 ## JSON helper
 
-Use `json()` when the body or status is selected dynamically and the method returns `Controller\Response`:
+Use `json()` when the body is selected dynamically or the response needs a non-default status or custom headers:
 
 ```php
-#[Route('/dogs')]
-public function index(): Controller\Response
+use GustavPHP\Gustav\Router\Method;
+
+#[Route('/dogs', Method::POST)]
+public function create(): Controller\Response
 {
     return $this->json([
         'name' => 'Rex',
         'age' => 4,
-    ]);
+    ], status: 201, headers: ['X-Resource-Type' => 'dog']);
 }
 ```
 
@@ -87,7 +88,7 @@ Existing `Serializer\Base` classes can still use `serialize()`:
 return $this->serialize(new Dog());
 ```
 
-New code should prefer plain readonly output DTOs with `#[JsonResponse]`. Both APIs use the same serialization pipeline.
+New code should prefer returning plain readonly output DTOs directly. Both APIs use the same serialization pipeline.
 
 ## PSR-7 response
 

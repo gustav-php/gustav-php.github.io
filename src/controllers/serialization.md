@@ -4,10 +4,10 @@ Gustav has one recursive JSON pipeline for typed controller returns, `json()`, a
 
 ## Typed JSON responses
 
-Add `#[JsonResponse]` when a route should return its declared PHP value directly. Constructor-promoted, readonly output DTOs are the canonical style:
+Return a declared PHP value directly and Gustav serializes it as JSON. Constructor-promoted, readonly output DTOs are the canonical style:
 
 ```php
-use GustavPHP\Gustav\Attribute\{JsonResponse, Route};
+use GustavPHP\Gustav\Attribute\Route;
 
 enum DogState: string
 {
@@ -37,7 +37,6 @@ final readonly class DogOutput
 }
 
 #[Route('/dogs/{id}')]
-#[JsonResponse]
 public function show(): DogOutput
 {
     return new DogOutput(
@@ -64,18 +63,21 @@ The response has status `200`, content type `application/json`, and this body:
 }
 ```
 
-Set a static status and headers on the attribute:
+Direct JSON responses use status `200`. When a route needs a different status or custom headers, return a Gustav response through `json()`:
 
 ```php
 #[Route('/dogs')]
-#[JsonResponse(status: 201, headers: ['X-Resource-Type' => 'dog'])]
-public function create(): DogOutput
+public function create(): Controller\Response
 {
-    // ...
+    return $this->json(
+        new DogOutput(/* ... */),
+        status: 201,
+        headers: ['X-Resource-Type' => 'dog'],
+    );
 }
 ```
 
-Direct handlers must declare exactly one named return type. Nullable types such as `?DogOutput` are accepted and serialize `null` as JSON `null`. Ambiguous unions, `mixed`, `object`, `void`, and response objects marked with `#[JsonResponse]` are rejected when routes are registered. Without `#[JsonResponse]`, a route must return a non-null Gustav response or PSR-7 `ResponseInterface`.
+Handlers must declare exactly one named return type. A non-null Gustav response or PSR-7 `ResponseInterface` passes through unchanged; every other supported type is inferred as JSON. Nullable types such as `?DogOutput` are accepted and serialize `null` as JSON `null`. Ambiguous unions, `mixed`, `object`, and `void` are rejected when routes are registered.
 
 ## Supported values
 
@@ -140,7 +142,7 @@ public function show(): Controller\Response
 }
 ```
 
-The helper uses the same recursive normalizer, enum conversion, exclusions, float handling, and error safety as `#[JsonResponse]`.
+The helper uses the same recursive normalizer, enum conversion, exclusions, float handling, and error safety as an inferred JSON response.
 
 ## Legacy serializer helper
 
@@ -157,4 +159,4 @@ final class Dog extends Serializer\Base
 return $this->serialize(new Dog());
 ```
 
-The legacy facade now delegates to the same normalizer and no longer drops scalar members from mixed arrays. New output DTOs do not need to extend `Serializer\Base`; prefer plain readonly classes returned with `#[JsonResponse]`.
+The legacy facade now delegates to the same normalizer and no longer drops scalar members from mixed arrays. New output DTOs do not need to extend `Serializer\Base`; prefer returning plain readonly classes directly.
