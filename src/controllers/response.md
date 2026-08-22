@@ -71,3 +71,23 @@ You can find out more about Serialization [here](./serialization.md).
 ## View
 
 _tbd_
+
+## HTTP errors
+
+Throw `Http\Exception\HttpException` when a request should fail with a specific
+HTTP status and optional headers:
+
+```php
+use GustavPHP\Gustav\Http\Exception\HttpException;
+
+throw new HttpException(
+    404,
+    'Dog not found',
+    ['X-Error-Code' => 'DOG_NOT_FOUND'],
+);
+```
+
+In production, Gustav returns a JSON error document and hides messages from
+unexpected server exceptions. In development, the same exception is rendered
+with the debug page. Authentication exceptions use this mechanism for `401`
+and `403` responses.

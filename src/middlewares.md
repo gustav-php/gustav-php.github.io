@@ -1,49 +1,83 @@
-## Middlewares
+# Middleware
 
-Middlewares are classes that are run before the controller is executed. They are defined by extending the `Middleware\Base` class.
+Gustav middleware follows PSR-15. A middleware can inspect or replace the
+request before a controller runs, short-circuit the request with its own
+response, and inspect or replace the response on the way back out.
 
 ```php
-class MyMiddleware extends Middleware\Base
-{
-    public function handle(Psr\Http\Message\ServerRequestInterface $request): ServerRequestInterface
-    {
-        // do stuff with `$request`
+use GustavPHP\Gustav\Middleware\Base;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
-        return $request;
+class TimingMiddleware extends Base
+{
+    public function process(
+        ServerRequestInterface $request,
+        RequestHandlerInterface $handler,
+    ): ResponseInterface {
+        $startedAt = hrtime(true);
+        $response = $handler->handle($request);
+
+        return $response->withHeader(
+            'Server-Timing',
+            'app;dur=' . ((hrtime(true) - $startedAt) / 1_000_000),
+        );
     }
 }
 ```
 
-To use a middleware with a controller, you need to add the `GustavPHP\Gustav\Attribute\Middleware` attribute to the controllers class.
+## Controller and route middleware
+
+Attach middleware to a controller to run it for every route in that class.
+Attach it to a route method for one endpoint. The attribute is repeatable.
 
 ```php
-#[GustavPHP\Gustav\Attribute\Middleware(new MyMiddleware())]
-class CatsController extends Controller\Base
-//...
-```
+use GustavPHP\Gustav\Attribute\Middleware;
 
-You can add information to the request by adding attributes to the request.
-
-```php
-public function handle(Psr\Http\Message\ServerRequestInterface $request): ServerRequestInterface
-{
-    $request = $request->withAttribute('from-middleware', 'Hello World!');
-
-    return $request;
-}
-```
-
-And then get them from the Request in Controllers.
-
-```php
+#[Middleware(new RequestIdMiddleware())]
 class DogsController extends Controller\Base
 {
-    #[Route('/from-middleware')]
-    public function police(#[Request] Psr\Http\Message\ServerRequestInterface $request)
+    #[Route('/dogs')]
+    #[Middleware(new TimingMiddleware())]
+    public function list(): Controller\Response
     {
-        $info = $request->getAttribute('from-middleware');
-
-        return $this->plaintext($info);
+        return $this->json([]);
     }
 }
 ```
+
+Middleware runs in this order on the way in:
+
+1. Application-wide middleware
+2. Controller middleware
+3. Route middleware
+
+Responses pass back through the same middleware in reverse order.
+
+## Application-wide middleware
+
+Register middleware that should wrap every request on the application:
+
+```php
+$app = new Application($configuration);
+$app->addMiddleware(new RequestIdMiddleware());
+```
+
+## Request-only middleware
+
+Existing Gustav middleware using `handle()` remains supported. It can modify
+the request or return a Gustav `Controller\Response` to stop the pipeline.
+
+```php
+class RequestContextMiddleware extends Middleware\Base
+{
+    public function handle(ServerRequestInterface $request): ServerRequestInterface
+    {
+        return $request->withAttribute('request-id', bin2hex(random_bytes(8)));
+    }
+}
+```
+
+A short-circuit response ends only the current request. The RoadRunner worker
+continues serving later requests.
