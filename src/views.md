@@ -24,10 +24,10 @@ final readonly class HomeController
 }
 ```
 
-`home` resolves to `views/home.php` under the configured view directory. The
-`.php` extension is optional in logical names. Absolute paths, parent traversal,
-non-PHP extensions, unreadable files, and symlinks escaping the configured
-directory are rejected.
+`home` resolves to `views/home.phtml` under the configured view directory. The
+`.phtml` extension is optional in logical names. Absolute paths, parent
+traversal, other extensions, unreadable files, and symlinks escaping the
+configured directory are rejected.
 
 View responses use status `200` and `Content-Type: text/html; charset=utf-8` by
 default. Supply response metadata only when it differs:
@@ -54,7 +54,7 @@ return new View('home', [
 ```
 
 ```php
-<!-- views/home.php -->
+<!-- views/home.phtml -->
 <h1><?= $view->escape($title) ?></h1>
 <p><?= $view->escape($model['title']) ?></p>
 ```
@@ -128,14 +128,14 @@ Declare a layout from a page template. Output from the page becomes the
 layout's `content` section:
 
 ```php
-<!-- views/home.php -->
+<!-- views/home.phtml -->
 <?php $view->layout('layout', ['title' => $model->title]) ?>
 
 <h1><?= $view->escape($model->title) ?></h1>
 ```
 
 ```php
-<!-- views/layout.php -->
+<!-- views/layout.phtml -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -179,7 +179,7 @@ Partials receive their own data and rendering context:
 ```
 
 ```php
-<!-- views/components/dog.php -->
+<!-- views/components/dog.phtml -->
 <article><?= $view->escape($dog->name) ?></article>
 ```
 

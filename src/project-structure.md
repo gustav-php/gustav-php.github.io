@@ -35,9 +35,9 @@ environment variables.
 
 The `public/` directory contains static files exposed from the site root.
 
-The `views/` directory contains native PHP templates. PHP's normal opcode cache
-handles compiled code in production; Gustav does not require a writable view
-cache directory.
+The `views/` directory contains native PHP templates using the `.phtml`
+extension. PHP's normal opcode cache handles compiled code in production;
+Gustav does not require a writable view cache directory.
 
 The `src/` directory contains all the components that build your application:
 
