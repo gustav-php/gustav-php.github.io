@@ -1,46 +1,194 @@
 # Configuration
 
-Configure the application when constructing it in `app/index.php`.
+Gustav separates framework bootstrap settings from application settings. The
+starter uses conventional project paths and reads `MODE` without mutable
+application setup in `app/index.php`:
 
 ```php
-$configuration = new Configuration(
-    mode: \GustavPHP\Gustav\Mode::Production,
+use GustavPHP\Gustav\{Application, Configuration};
+
+Application::run(Configuration::forProject(
     namespace: __NAMESPACE__,
-    cache: __DIR__ . '/../cache/',
-    files: __DIR__ . '/../public/',
-    views: __DIR__ . '/../views/',
-    eventNamespaces: [],
-    routeNamespaces: [],
-    serializerNamespaces: [],
-    serviceNamespaces: [],
-    middlewareNamespaces: [],
+    root: dirname(__DIR__),
+));
+```
+
+`Configuration::forProject()` selects `development` when `MODE` is absent and
+accepts `MODE=development` or `MODE=production`. It configures these paths
+relative to the supplied project root:
+
+| Setting      | Conventional path |
+| ------------ | ----------------- |
+| Cache        | `cache/`          |
+| Static files | `public/`         |
+| Views        | `views/`          |
+
+## Typed application configuration
+
+Put immutable configuration classes under your application's `Config`
+namespace. Mark the class with `#[Config]` and map every constructor parameter
+to an environment variable with `#[Env]`:
+
+```php
+namespace App\Config;
+
+use GustavPHP\Gustav\Attribute\{Config, Env, Validate};
+use GustavPHP\Gustav\Validation\Common\Integer;
+
+enum DatabaseRole: string
+{
+    case Primary = 'primary';
+    case Replica = 'replica';
+}
+
+#[Config]
+final readonly class DatabaseConfig
+{
+    /** @param list<string> $replicas */
+    public function __construct(
+        #[Env('DATABASE_URL')]
+        public string $url,
+        #[Env('DATABASE_POOL_SIZE'), Validate(new Integer(min: 1, max: 100))]
+        public int $poolSize = 10,
+        #[Env('DATABASE_SSL')]
+        public bool $ssl = true,
+        #[Env('DATABASE_REPLICAS')]
+        public array $replicas = [],
+        #[Env('DATABASE_ROLE')]
+        public DatabaseRole $role = DatabaseRole::Primary,
+    ) {
+    }
+}
+```
+
+Gustav discovers and hydrates every `#[Config]` class before request handling
+starts. Each object is registered as an application singleton, so controllers,
+services, and middleware use ordinary constructor injection:
+
+```php
+final readonly class DatabaseConnectionFactory
+{
+    public function __construct(private DatabaseConfig $configuration)
+    {
+    }
+
+    public function connect(): PDO
+    {
+        return new PDO($this->configuration->url);
+    }
+}
+```
+
+No service binding or configuration lookup is required.
+
+Service-provider factories can resolve the same singleton when constructing a
+third-party object that cannot be autowired.
+
+## Conversion and optional values
+
+Environment values are strings. Gustav converts them deterministically from
+the declared constructor type:
+
+| PHP type    | Accepted environment value                                   |
+| ----------- | ------------------------------------------------------------ |
+| `string`    | The value unchanged                                          |
+| `int`       | A valid whole number, including `0` and negative values      |
+| `float`     | A finite decimal number                                      |
+| `bool`      | `true`, `false`, `1`, or `0`, case-insensitive               |
+| `array`     | JSON that decodes to a PHP array                             |
+| backed enum | An exact string backing value or valid integer backing value |
+
+Nullable forms of these types are supported. Missing values follow PHP
+constructor semantics:
+
+- A parameter without a default is required, even when its type is nullable.
+- An omitted parameter with a default keeps that default.
+- Use `?string $value = null` when absence should resolve to `null`.
+- An empty environment string is still a string; it is not treated as `null`.
+
+Ambiguous unions and unsupported object types are rejected during startup
+instead of being guessed at runtime. Arrays do not infer element types; validate
+their contents inside application code when needed.
+
+Repeatable `#[Validate(...)]` attributes use the same built-in validation rules
+as request input. All type and rule failures across discovered configuration
+classes are collected before Gustav throws one configuration exception.
+
+## Environment files and secrets
+
+`Configuration::forProject()` loads optional files from the project root in
+this order:
+
+1. `.env` provides safe, committed development defaults.
+2. `.env.local` overrides those defaults for one machine and should be ignored
+   by Git.
+3. Real process environment variables override both files.
+
+For example:
+
+```dotenv
+MODE=development
+DATABASE_POOL_SIZE=10
+DATABASE_SSL=true
+DATABASE_REPLICAS='["postgres-replica.internal"]'
+```
+
+Use deployment environment variables for production secrets. Gustav never
+includes the rejected raw value in its own startup diagnostics. Errors identify
+the variable and target field so multiple problems can be fixed together:
+
+```text
+Application configuration is invalid:
+- DATABASE_POOL_SIZE (App\Config\DatabaseConfig::$poolSize): Value must be integer
+- DATABASE_URL (App\Config\DatabaseConfig::$url): Value is required
+```
+
+Configuration objects contain the resolved values by design. Do not dump or
+log an entire configuration object when it contains credentials.
+
+## Testing configuration
+
+Use an isolated `Environment` instead of changing process-global variables in
+tests:
+
+```php
+use GustavPHP\Gustav\Config\Environment;
+use GustavPHP\Gustav\Configuration;
+
+$configuration = Configuration::forProject(
+    namespace: 'App',
+    root: dirname(__DIR__),
+    environment: Environment::fromArray([
+        'MODE' => 'production',
+        'DATABASE_URL' => 'sqlite::memory:',
+    ]),
 );
 ```
 
-| **Key**                | **Description**                                         |
-| ---------------------- | ------------------------------------------------------- |
-| `mode`                 | Sets the application in development or production.      |
-| `namespace`            | Sets the application namespace for class discovery.     |
-| `cache`                | Absolute path to the directory used for cache.          |
-| `files`                | Absolute path to the directory used for static assets.  |
-| `views`                | Absolute path to the directory used for view templates. |
-| `eventNamespaces`      | Namespace for all additional Event classes.             |
-| `routeNamespaces`      | Namespace for all additional Route classes.             |
-| `serializerNamespaces` | Namespace for all additional Serializer classes.        |
-| `serviceNamespaces`    | Namespace for additional `#[Service]` classes.          |
-| `middlewareNamespaces` | Namespace for additional `#[GlobalMiddleware]` classes. |
+The supplied map is the complete test environment, which keeps tests
+deterministic and prevents one test from leaking variables into another.
 
-Gustav automatically discovers routes, services, middleware, serializers, and
-events from their conventional namespaces under the application namespace.
-The additional namespace arrays are useful for modules outside that structure.
+## Custom framework layout
 
-Construct the application and start request handling; ordinary projects do not
-need imperative registration calls in their entrypoint:
+Construct `Configuration` directly when the project does not use the
+conventional directories:
 
 ```php
-$app = new Application($configuration);
-$app->start();
+$configuration = new Configuration(
+    mode: Mode::Production,
+    namespace: 'App',
+    cache: '/srv/example/var/cache/',
+    files: '/srv/example/web/',
+    views: '/srv/example/templates/',
+    routeNamespaces: ['Module\Billing\Routes'],
+    eventNamespaces: ['Module\Billing\Events'],
+    serializerNamespaces: ['Module\Billing\Serializers'],
+    serviceNamespaces: ['Module\Billing\Services'],
+    middlewareNamespaces: ['Module\Billing\Middlewares'],
+    configurationNamespaces: ['Module\Billing\Config'],
+);
 ```
 
-The `Configuration` object is also registered as an application singleton, so
-services can constructor-inject it when they need framework configuration.
+Direct construction reads real process variables for typed application
+configuration. Pass an explicit `Environment` when another source is required.
+The framework `Configuration` object itself remains injectable as a singleton.

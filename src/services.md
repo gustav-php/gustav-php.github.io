@@ -78,7 +78,7 @@ use GustavPHP\Gustav\Attribute\Service;
 use GustavPHP\Gustav\Service\Lifetime;
 
 #[Service(lifetime: Lifetime::Singleton)]
-final class DatabaseConfiguration {}
+final class MetricsRegistry {}
 
 #[Service(as: Cache::class, lifetime: Lifetime::Singleton)]
 final class RedisCache implements Cache {}
@@ -143,13 +143,9 @@ final class InfrastructureProvider implements Provider
         $services->singleton(
             PDO::class,
             function (Container $services): PDO {
-                $database = $services->get(DatabaseConfiguration::class);
+                $database = $services->get(DatabaseConfig::class);
 
-                return new PDO(
-                    $database->dsn,
-                    $database->username,
-                    $database->password,
-                );
+                return new PDO($database->url);
             },
         );
     }
@@ -162,3 +158,9 @@ declarative. Providers must have a public zero-argument constructor.
 
 The registry exposes `bind()`, `singleton()`, `request()`, and `transient()` for
 dynamic application composition. It is frozen when request handling begins.
+
+Application configuration does not require a provider or a singleton service
+marker. Define a `#[Config]` readonly class and inject it directly; Gustav
+hydrates and registers it before providers run. See
+[Configuration](./configuration.md) for environment conversion, validation,
+defaults, and test overrides.
