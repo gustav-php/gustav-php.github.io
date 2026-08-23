@@ -4,6 +4,7 @@
     - [Installation](./installation.md)
     - [Project Structure](./project-structure.md)
     - [Configuration](./configuration.md)
+    - [Application commands](./commands.md)
     - [Production](./production.md)
 - Documentation
     - [Controllers](./controllers/index.md)

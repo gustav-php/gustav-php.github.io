@@ -2,15 +2,16 @@
 
 Gustav separates framework bootstrap settings from application settings. The
 starter uses conventional project paths and reads `MODE` without mutable
-application setup in `app/index.php`:
+application setup. `app/bootstrap.php` returns the configuration shared by the
+HTTP worker and project CLI:
 
 ```php
-use GustavPHP\Gustav\{Application, Configuration};
+use GustavPHP\Gustav\Configuration;
 
-Application::run(Configuration::forProject(
-    namespace: __NAMESPACE__,
+return Configuration::forProject(
+    namespace: 'App',
     root: dirname(__DIR__),
-));
+);
 ```
 
 `Configuration::forProject()` selects `development` when `MODE` is absent and
@@ -186,6 +187,7 @@ $configuration = new Configuration(
     serviceNamespaces: ['Module\Billing\Services'],
     middlewareNamespaces: ['Module\Billing\Middlewares'],
     configurationNamespaces: ['Module\Billing\Config'],
+    commandNamespaces: ['Module\Billing\Commands'],
 );
 ```
 

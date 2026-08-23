@@ -52,3 +52,28 @@ $app = new Application($configuration);
 The normal startup path still runs, so missing variables, conversions,
 defaults, backed enums, and `#[Validate]` rules behave exactly as they do in a
 worker.
+
+## Testing commands
+
+Application commands run in process through Symfony's `ApplicationTester`:
+
+```php
+use Symfony\Component\Console\Tester\ApplicationTester;
+
+$configuration = require dirname(__DIR__) . '/app/bootstrap.php';
+$console = (new Application($configuration))->console();
+$tester = new ApplicationTester($console);
+
+$status = $tester->run([
+    'command' => 'users:sync',
+    'tenant' => 'acme',
+    '--dry-run' => true,
+]);
+
+expect($status)->toBe(0);
+```
+
+The tester uses normal command discovery, typed input conversion, validation,
+dependency injection, exception rendering, and scope cleanup without opening a
+port. See [Application commands](./commands.md#testing-commands) for the full
+example and exit-code contract.
