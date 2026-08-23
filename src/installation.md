@@ -19,6 +19,13 @@ php gustav dev
 Once the development server starts, the application is available at
 `http://localhost:4201`.
 
+The same project CLI lists built-in and application commands:
+
+```bash
+php gustav list
+php gustav joke --times=2
+```
+
 The starter's committed `.env` contains safe development defaults. Copy
 machine-specific values into `.env.local`; Gustav loads it automatically and
 the file is ignored by Git.

@@ -72,6 +72,11 @@ they are available to the logger instead. If an application logger throws
 while Gustav is reporting a server failure, Gustav writes the record through
 its built-in fallback logger and keeps the worker alive.
 
+Unexpected application-command exceptions use the same reporter. Their record
+message is `Command failed` and the context contains `command` plus the
+structured exception. Invalid command input is expected and is not logged.
+Production console output never includes the unexpected exception details.
+
 ## Request IDs
 
 Gustav creates one `RequestId` before application-wide middleware runs and
@@ -129,7 +134,7 @@ final class ApplicationLogger extends AbstractLogger
 
 Use a [service provider](./services.md#service-providers) when a third-party
 logger needs scalar configuration or a pre-built object. Keep a logger
-singleton unless it intentionally depends on request-scoped state; add the
+singleton unless it intentionally depends on scoped state; add the
 `RequestId` to ordinary application records explicitly when you need
 correlation.
 

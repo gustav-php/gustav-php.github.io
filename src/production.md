@@ -14,6 +14,10 @@ variable and field name, but not its rejected raw value.
 Workers capture configuration once at startup. Restart them after changing an
 environment variable.
 
+Application commands use the same production mode. Unexpected command
+exceptions are logged with the command name while console output remains the
+safe message `Command failed`.
+
 Start the production server with:
 
 ```sh
