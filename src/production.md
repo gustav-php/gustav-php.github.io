@@ -1,10 +1,20 @@
 # Production
 
-Enable production mode with `MODE=production` or configure it in
-`app/index.php`. Production responses hide unexpected exception messages,
-class names, files, and traces.
+Enable production mode with the real environment variable `MODE=production`.
+Production responses hide unexpected exception messages, class names, files,
+and traces.
 
-To start the production serve just run:
+Keep only safe local defaults in the committed `.env` file and keep
+`.env.local` out of Git. Deployment environment variables override both files,
+so secrets can come from the hosting platform without changing application
+code. Typed `#[Config]` classes are hydrated and validated before RoadRunner
+starts serving requests. A missing or invalid variable fails startup with the
+variable and field name, but not its rejected raw value.
+
+Workers capture configuration once at startup. Restart them after changing an
+environment variable.
+
+Start the production server with:
 
 ```sh
 php gustav start

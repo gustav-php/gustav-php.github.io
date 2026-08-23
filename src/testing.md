@@ -25,5 +25,30 @@ $request = (new ServerRequest('POST', '/dogs'))
 $response = $app->handle($request);
 ```
 
-RoadRunner remains the production transport used by `Application::start()`;
-the request behavior is shared by both entry points.
+RoadRunner remains the production transport used by `Application::run()`; the
+request behavior is shared by both entry points.
+
+## Configuration overrides
+
+Create an isolated environment map when a test needs typed application
+configuration. This avoids `putenv()` and prevents process-global state from
+leaking between tests:
+
+```php
+use GustavPHP\Gustav\Config\Environment;
+
+$configuration = Configuration::forProject(
+    namespace: 'App',
+    root: dirname(__DIR__),
+    environment: Environment::fromArray([
+        'DATABASE_URL' => 'sqlite::memory:',
+        'FEATURE_ENABLED' => 'false',
+    ]),
+);
+
+$app = new Application($configuration);
+```
+
+The normal startup path still runs, so missing variables, conversions,
+defaults, backed enums, and `#[Validate]` rules behave exactly as they do in a
+worker.

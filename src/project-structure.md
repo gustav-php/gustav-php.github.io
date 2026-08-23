@@ -1,17 +1,20 @@
 # Project Structure
 
-Gustav PHP is flexible in terms of project structure, here you can find informations for the recommended structure that is used with the starter project.
+Gustav does not force a project layout. This is the conventional structure used
+by the starter project.
 
 ## Directory Structure
 
-This is the minimal directory structure to in the starter project.
+The minimal starter structure is:
 
 ```bash
 ├─ app/
 │  └─ index.php
 ├─ cache/
+├─ .env
 ├─ public/
 ├─ src/
+│  ├─ Config/
 │  ├─ Events/
 │  ├─ Middlewares/
 │  ├─ Routes/
@@ -23,12 +26,17 @@ This is the minimal directory structure to in the starter project.
 
 The `app/index.php` is the entrypoint to your application.
 
-The `cache/` directory is used for cache files with the views.
+The `cache/` directory stores compiled view files.
 
-The `public/` directory contains all static files and are publically accessible in the root.
+The committed `.env` file contains safe local defaults. Put machine-specific
+values in the ignored `.env.local` file and production secrets in real
+environment variables.
+
+The `public/` directory contains static files exposed from the site root.
 
 The `src/` directory contains all the components that build your application:
 
+- `Config/` contains immutable typed application configuration
 - `Events/` contains all Event listeners
 - `Middlewares/` contains all Middlewares
 - `Routes/` contains all Routes

@@ -16,4 +16,9 @@ cd example-app
 php gustav dev
 ```
 
-Once you have started the Artisan development server, your application will be accessible in your web browser at `http://localhost:4201`.
+Once the development server starts, the application is available at
+`http://localhost:4201`.
+
+The starter's committed `.env` contains safe development defaults. Copy
+machine-specific values into `.env.local`; Gustav loads it automatically and
+the file is ignored by Git.
