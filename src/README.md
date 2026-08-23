@@ -16,5 +16,6 @@ Gustav is a PHP framework for building web applications. It is designed to be si
 - [x] Fast Routing
 - [x] Middlewares
 - [x] Dependency Injection
+- [x] Typed PSR-14 events
 - [x] Auto-reload during development
 - [x] more

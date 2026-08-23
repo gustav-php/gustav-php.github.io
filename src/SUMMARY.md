@@ -18,5 +18,5 @@
 - [Middlewares](./middlewares.md)
 - [Authentication](./authentication.md)
 - [Testing](./testing.md)
-- [Events](./events.md)
+- [Typed events](./events.md)
 - [Views](./views.md)
