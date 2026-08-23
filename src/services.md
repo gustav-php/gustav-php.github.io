@@ -93,15 +93,18 @@ the first request or user for the lifetime of a RoadRunner worker.
 
 ## Request-aware services
 
-The current `ServerRequestInterface` is available inside the request scope:
+The current request and its validated request ID are available inside the
+request scope:
 
 ```php
+use GustavPHP\Gustav\Http\RequestId;
 use Psr\Http\Message\ServerRequestInterface;
 
 final readonly class RequestContext
 {
     public function __construct(
         public ServerRequestInterface $request,
+        public RequestId $requestId,
     ) {
     }
 }
@@ -110,12 +113,18 @@ final readonly class RequestContext
 Gustav automatically provides these framework services:
 
 - `Application` and `Configuration` as singletons
+- `Psr\Log\LoggerInterface` as the default singleton logger
 - `ServerRequestInterface` for the active request
+- `Http\RequestId` for the active request
 - `Service\Container`, resolving to the active scope
 
 Prefer injecting the specific dependency a class needs. Inject the container
 itself mainly in service factories or infrastructure that genuinely performs
 dynamic service lookup.
+
+See [Logging and request IDs](./logging.md) for writing PSR-3 records,
+correlating them with requests, and replacing the default logger through
+service discovery.
 
 ## Service providers
 

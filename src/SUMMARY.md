@@ -13,6 +13,7 @@
     - [Response](./controllers/response.md)
     - [Serialization](./controllers/serialization.md)
 - [Application services](./services.md)
+- [Logging and request IDs](./logging.md)
 - [Middlewares](./middlewares.md)
 - [Authentication](./authentication.md)
 - [Testing](./testing.md)
