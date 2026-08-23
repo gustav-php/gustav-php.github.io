@@ -134,6 +134,16 @@ Authentication exceptions use this mechanism for `401` and `403` responses.
 
 Do not encode an HTTP status in a generic exception's numeric code. Only typed `HttpException` instances control the response status; an unexpected exception such as `new RuntimeException('failure', 422)` is still a `500`.
 
+## Request ID header
+
+Every response receives `X-Request-ID`, including short-circuit middleware
+responses and mapped `4xx` or `5xx` errors. Gustav preserves one safe incoming
+ID and generates a replacement when it is missing or unsafe. Inject the typed
+`GustavPHP\Gustav\Http\RequestId` when application code needs the same value.
+
+See [Logging and request IDs](../logging.md) for the accepted ID format and log
+correlation.
+
 ## Request input errors
 
 Gustav uses three statuses for request binding:
@@ -198,5 +208,9 @@ Production responses never expose unexpected exception messages, class names, fi
 ```
 
 Development mode keeps the debug page for unexpected exceptions and regular `HttpException` instances. A failed request is isolated to that request; the RoadRunner worker continues serving subsequent requests.
+
+Every `5xx` is reported once through `Psr\Log\LoggerInterface` with the request
+ID, method, path, status, and exception. Expected `4xx` responses remain quiet
+unless application code logs them explicitly.
 
 Serialization failures, including circular references and unsupported output values, follow this same rule. They never expose DTO class names, property paths, or internal exception messages in production.

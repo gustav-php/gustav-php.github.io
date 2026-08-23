@@ -38,7 +38,7 @@ each request.
 ```php
 use GustavPHP\Gustav\Attribute\Middleware;
 
-#[Middleware(RequestIdMiddleware::class)]
+#[Middleware(RequireApiKey::class)]
 class DogsController extends Controller\Base
 {
     #[Route('/dogs')]
@@ -68,7 +68,7 @@ use GustavPHP\Gustav\Attribute\GlobalMiddleware;
 use GustavPHP\Gustav\Middleware\Base;
 
 #[GlobalMiddleware(priority: -100)]
-final class RequestIdMiddleware extends Base
+final class SecurityHeadersMiddleware extends Base
 {
     // ...
 }
@@ -77,6 +77,11 @@ final class RequestIdMiddleware extends Base
 Lower priorities run earlier on the way in and later on the way out.
 Application-wide middleware is resolved through the service container without
 entrypoint registration.
+
+Gustav creates and validates the request ID before application-wide middleware
+runs. Inject `GustavPHP\Gustav\Http\RequestId` when middleware needs it; do not
+add a separate request-ID middleware. Every response already receives the
+canonical `X-Request-ID` header.
 
 ## Injecting middleware dependencies
 
@@ -125,7 +130,7 @@ class RequestContextMiddleware extends Middleware\Base
 {
     public function handle(ServerRequestInterface $request): ServerRequestInterface
     {
-        return $request->withAttribute('request-id', bin2hex(random_bytes(8)));
+        return $request->withAttribute('locale', 'en');
     }
 }
 ```

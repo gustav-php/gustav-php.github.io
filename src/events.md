@@ -1,16 +1,16 @@
-## Events
+# Events
 
-All events must extend the `Events\Base` class.
+Event listeners extend `Event\Base`:
 
 ```php
-use GustavPHP\Gustav\Events;
+use GustavPHP\Gustav\Event;
 
-class TestEvent extends Events\Base
+class TestEvent extends Event\Base
 {
 }
 ```
 
-Events can be defined by attaching the Event Attributes to a class.
+Attach `#[Event]` to select the dispatched event name:
 
 ```php
 use GustavPHP\Gustav\Attribute\Event;
@@ -21,17 +21,23 @@ class TestEvent extends Event\Base
 {
     public function handle(Event\Payload $payload): void
     {
-        $this->log('Event: ' . $payload->getEvent());
+        $data = $payload->getData();
+
+        // React to the event payload.
     }
 }
 ```
 
-Events can be dispatched from anywhere using.
+Dispatch an event with its payload data:
 
 ```php
 GustavPHP\Gustav\Event\Manager::dispatch('test', [
-    'key' => 'value'
+    'key' => 'value',
 ]);
 ```
 
-Events are automatically added like Routes in the `App\Events` namespace.
+Listeners under the application's `Events` namespace are discovered during
+startup. Event listeners are created without constructor dependencies. Put
+logging and other injected infrastructure in the service that dispatches the
+event; inject `Psr\Log\LoggerInterface` there instead of relying on a static
+event logging helper.
