@@ -20,7 +20,6 @@ relative to the supplied project root:
 
 | Setting      | Conventional path |
 | ------------ | ----------------- |
-| Cache        | `cache/`          |
 | Static files | `public/`         |
 | Views        | `views/`          |
 
@@ -178,7 +177,6 @@ conventional directories:
 $configuration = new Configuration(
     mode: Mode::Production,
     namespace: 'App',
-    cache: '/srv/example/var/cache/',
     files: '/srv/example/web/',
     views: '/srv/example/templates/',
     routeNamespaces: ['Module\Billing\Routes'],

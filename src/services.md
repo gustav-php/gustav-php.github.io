@@ -118,6 +118,7 @@ During HTTP requests, Gustav automatically provides these framework services:
 - `Application` and `Configuration` as singletons
 - `Psr\Log\LoggerInterface` as the default singleton logger
 - `Router\UrlGeneratorInterface` for named application routes
+- `View\ViewRendererInterface` for HTML view responses
 - `ServerRequestInterface` for the active request
 - `Http\RequestId` for the active request
 - `Service\Container`, resolving to the active scope

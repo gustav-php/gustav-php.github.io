@@ -25,24 +25,26 @@ final readonly class DogsController
 }
 ```
 
-Controllers do not need to extend a framework class. Extend `Controller\Base`
-only when its HTML, redirect, or explicit response helpers make a handler
-clearer:
+Controllers do not need to extend a framework class. Return a `View` directly
+for HTML templates:
 
 ```php
 use GustavPHP\Gustav\Attribute\{Controller, Get};
-use GustavPHP\Gustav\Controller\{Base, Response};
+use GustavPHP\Gustav\View;
 
 #[Controller]
-final class HomeController extends Base
+final readonly class HomeController
 {
     #[Get]
-    public function index(): Response
+    public function index(): View
     {
-        return $this->view('home.latte');
+        return new View('home');
     }
 }
 ```
+
+The optional `Controller\Base` class remains useful when its HTML, redirect, or
+explicit response helpers make a handler clearer.
 
 Use `#[Post]`, `#[Put]`, `#[Patch]`, or `#[Delete]` for write endpoints. Typed
 input attributes bind request data to handler arguments:
@@ -73,7 +75,6 @@ use GustavPHP\Gustav\{Configuration, Mode};
 return new Configuration(
     mode: Mode::Production,
     namespace: 'App',
-    cache: __DIR__ . '/../cache',
     routeNamespaces: [
         'Shared\\Http\\Routes',
     ],

@@ -1,6 +1,9 @@
 # Response
 
-Every route declares exactly one response type. Gustav and PSR-7 response objects pass through unchanged; any other supported declared type is serialized as JSON. Gustav compiles that decision with the route table during startup.
+Every route declares exactly one response type. Gustav and PSR-7 response
+objects pass through unchanged, `View` responses render as HTML, and other
+supported declared types are serialized as JSON. Gustav compiles that decision
+with the route table during startup.
 
 ## Typed JSON
 
@@ -26,6 +29,25 @@ public function show(): DogOutput
 ```
 
 Gustav returns status `200`, supplies `Content-Type: application/json`, and recursively normalizes the value. See [Serialization](./serialization.md) for supported values, readonly DTOs, enums, exclusions, and failure behavior.
+
+## Views
+
+Return a `View` directly from a plain controller to render a native PHP
+template:
+
+```php
+use GustavPHP\Gustav\View;
+
+#[Get]
+public function index(): View
+{
+    return new View('home', ['title' => 'Gustav']);
+}
+```
+
+The response uses `text/html; charset=utf-8`. Views can also carry a custom
+status and headers. See [Views](../views.md) for typed view models, escaping,
+layouts, partials, and renderer replacement.
 
 The remaining convenience helpers on this page are protected methods supplied
 by the optional `Controller\Base` class.
