@@ -42,7 +42,7 @@ The `src/` directory contains all the components that build your application:
 
 - `Config/` contains immutable typed application configuration
 - `Commands/` contains automatically discovered application commands
-- `Events/` contains all Event listeners
+- `Events/` contains typed event objects and discovered `#[Listener]` classes
 - `Middlewares/` contains all Middlewares
 - `Routes/` contains all Routes
 - `Serializers/` contains all Serializers
