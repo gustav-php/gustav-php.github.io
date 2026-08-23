@@ -73,13 +73,14 @@ implementation of `Authenticator`. Attach the injectable authentication
 middleware to a controller or individual route:
 
 ```php
-use GustavPHP\Gustav\Attribute\{AuthUser, Middleware, Route};
+use GustavPHP\Gustav\Attribute\{AuthUser, Controller, Get, Middleware};
 use GustavPHP\Gustav\Auth\AuthenticationMiddleware;
 use GustavPHP\Gustav\Auth\Identity;
 
-class AccountController extends Controller\Base
+#[Controller('/account')]
+final class AccountController
 {
-    #[Route('/account')]
+    #[Get]
     #[Middleware(AuthenticationMiddleware::class)]
     public function account(#[AuthUser] Identity $identity): array
     {

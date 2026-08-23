@@ -31,17 +31,18 @@ class TimingMiddleware extends Base
 
 Attach middleware to a controller to run it for every route in that class.
 Attach it to a route method for one endpoint. The attribute is repeatable and
-takes a middleware class name. Gustav compiles this metadata when routes are
-registered and resolves the middleware through the application container for
+takes a middleware class name. Gustav compiles this metadata when the route
+table is built and resolves the middleware through the application container for
 each request.
 
 ```php
-use GustavPHP\Gustav\Attribute\Middleware;
+use GustavPHP\Gustav\Attribute\{Controller, Get, Middleware};
 
+#[Controller('/dogs')]
 #[Middleware(RequireApiKey::class)]
-class DogsController extends Controller\Base
+final class DogsController
 {
-    #[Route('/dogs')]
+    #[Get]
     #[Middleware(TimingMiddleware::class)]
     public function list(): array
     {

@@ -1,48 +1,76 @@
 # Controllers
 
-Controllers receive requests and return responses. Every controller extends `Controller\Base`, and public handler methods use `#[Route]`. A supported return type is serialized as JSON automatically:
+Controllers are ordinary constructor-injected PHP classes marked with
+`#[Controller]`. Add an HTTP method attribute to each public handler. Supported
+return values are serialized as JSON automatically:
 
 ```php
 namespace App\Routes;
 
-use GustavPHP\Gustav\Attribute\Route;
-use GustavPHP\Gustav\Controller;
+use GustavPHP\Gustav\Attribute\{Controller, Get};
 
-final class DogsController extends Controller\Base
+#[Controller('/dogs')]
+final readonly class DogsController
 {
-    #[Route('/dogs')]
+    public function __construct(private DogRepository $dogs)
+    {
+    }
+
+    /** @return list<DogOutput> */
+    #[Get]
     public function list(): array
     {
-        return [
-            ['name' => 'Rex', 'breed' => 'German Shepherd'],
-        ];
+        return $this->dogs->findAll();
     }
 }
 ```
 
-Pass a `Method` to register a non-GET route. Typed input attributes bind request data to handler arguments:
+Controllers do not need to extend a framework class. Extend `Controller\Base`
+only when its HTML, redirect, or explicit response helpers make a handler
+clearer:
 
 ```php
-use GustavPHP\Gustav\Attribute\{Body, Route};
-use GustavPHP\Gustav\Router\Method;
+use GustavPHP\Gustav\Attribute\{Controller, Get};
+use GustavPHP\Gustav\Controller\{Base, Response};
 
-#[Route('/dogs', Method::POST)]
-public function create(#[Body('name')] string $name): Controller\Response
+#[Controller]
+final class HomeController extends Base
 {
-    return $this->json(['name' => $name], status: 201);
+    #[Get]
+    public function index(): Response
+    {
+        return $this->view('home.latte');
+    }
 }
 ```
 
-See [Routing](./routing.md), [Request input](./request.md), [Validation](./validation.md), and [Responses](./response.md) for the complete controller API.
+Use `#[Post]`, `#[Put]`, `#[Patch]`, or `#[Delete]` for write endpoints. Typed
+input attributes bind request data to handler arguments:
+
+```php
+use GustavPHP\Gustav\Attribute\{Body, Post};
+
+#[Post]
+public function create(#[Body] CreateDogInput $input): DogOutput
+{
+    return $this->dogs->create($input);
+}
+```
+
+See [Routing](./routing.md), [Request input](./request.md),
+[Validation](./validation.md), and [Responses](./response.md) for the complete
+controller API.
 
 ## Discovery and startup
 
-Gustav discovers controller subclasses in the `Routes` namespace below the configured application namespace. Additional namespaces can be listed in `routeNamespaces`.
+Gustav discovers `#[Controller]` classes recursively in the `Routes` namespace
+below the configured application namespace. Additional namespaces can be
+listed in `routeNamespaces`.
 
 ```php
-use GustavPHP\Gustav\{Application, Configuration, Mode};
+use GustavPHP\Gustav\{Configuration, Mode};
 
-$configuration = new Configuration(
+return new Configuration(
     mode: Mode::Production,
     namespace: 'App',
     cache: __DIR__ . '/../cache',
@@ -50,9 +78,9 @@ $configuration = new Configuration(
         'Shared\\Http\\Routes',
     ],
 );
-
-$app = new Application($configuration);
-$app->start();
 ```
 
-Routes are reflected and validated once when the application starts. Invalid handler signatures fail during registration instead of becoming request-time errors.
+Gustav compiles an immutable route table, request binder, response handler, and
+middleware list once during application startup. Duplicate or ambiguous paths,
+duplicate names, invalid placeholders, non-public handlers, and invalid input
+or response signatures fail before the server begins accepting requests.
