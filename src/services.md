@@ -40,14 +40,17 @@ need an interface binding or a different lifetime.
 Type-hint dependencies in a controller, middleware, or another service:
 
 ```php
-final class DogsController extends Controller\Base
+use GustavPHP\Gustav\Attribute\{Controller, Get};
+
+#[Controller('/dogs')]
+final readonly class DogsController
 {
     public function __construct(
         private readonly DogRepository $dogs,
     ) {
     }
 
-    #[Route('/dogs')]
+    #[Get]
     public function list(): array
     {
         return $this->dogs->findAll();
@@ -114,6 +117,7 @@ During HTTP requests, Gustav automatically provides these framework services:
 
 - `Application` and `Configuration` as singletons
 - `Psr\Log\LoggerInterface` as the default singleton logger
+- `Router\UrlGeneratorInterface` for named application routes
 - `ServerRequestInterface` for the active request
 - `Http\RequestId` for the active request
 - `Service\Container`, resolving to the active scope

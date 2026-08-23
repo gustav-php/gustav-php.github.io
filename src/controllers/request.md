@@ -1,6 +1,6 @@
 # Request input
 
-Controller arguments can bind directly to an HTTP request. Add one input attribute to each argument and declare the PHP type Gustav should produce. Route signatures are checked when the application registers the route, and their binding metadata is reused for every request.
+Controller arguments can bind directly to an HTTP request. Add one input attribute to each argument and declare the PHP type Gustav should produce. Route signatures are checked when the application compiles its route table, and their binding metadata is reused for every request.
 
 | Attribute     | Input                    |
 | ------------- | ------------------------ |
@@ -17,10 +17,10 @@ Controller arguments can bind directly to an HTTP request. Add one input attribu
 Use `#[Request]` when a handler needs the complete request instead of a bound value:
 
 ```php
-use GustavPHP\Gustav\Attribute\{Request, Route};
+use GustavPHP\Gustav\Attribute\{Get, Request};
 use Psr\Http\Message\ServerRequestInterface;
 
-#[Route('/dogs')]
+#[Get('/dogs')]
 public function list(#[Request] ServerRequestInterface $request): Controller\Response
 {
     return $this->json([
@@ -37,10 +37,9 @@ The parameter must accept `ServerRequestInterface` or a compatible parent interf
 Pass a key or name to bind one value from a source:
 
 ```php
-use GustavPHP\Gustav\Attribute\{Body, Cookie, Header, Param, Query, Route};
-use GustavPHP\Gustav\Router\Method;
+use GustavPHP\Gustav\Attribute\{Body, Cookie, Header, Param, Post, Query};
 
-#[Route('/dogs/{id}', Method::POST)]
+#[Post('/dogs/{id}')]
 public function update(
     #[Param('id')] int $id,
     #[Query('notify')] bool $notify,
@@ -58,7 +57,9 @@ The PHP argument name does not need to match the external name. In the example, 
 Omit the key to receive the complete source as an array:
 
 ```php
-#[Route('/dogs')]
+use GustavPHP\Gustav\Attribute\{Cookie, Get, Header, Query};
+
+#[Get('/dogs')]
 public function list(
     #[Query] array $query,
     #[Header] array $headers,
@@ -75,7 +76,9 @@ public function list(
 A keyed argument without a PHP default is required. Give the argument a default to make omission valid:
 
 ```php
-#[Route('/dogs')]
+use GustavPHP\Gustav\Attribute\{Get, Query};
+
+#[Get('/dogs')]
 public function list(
     #[Query('page')] int $page = 1,
     #[Query('archived')] bool $archived = false,
@@ -96,7 +99,7 @@ Missing required input, disallowed `null`, and conversion failures produce a str
 
 ## Type conversion
 
-Gustav converts only the following request types. It rejects ambiguous unions such as `int|string` when registering the route.
+Gustav converts only the following request types. It rejects ambiguous unions such as `int|string` when compiling the route.
 
 | PHP type    | Accepted input                                          |
 | ----------- | ------------------------------------------------------- |
@@ -139,7 +142,9 @@ final readonly class CreateDogInput
 Bind the DTO from either source:
 
 ```php
-#[Route('/dogs', Method::POST)]
+use GustavPHP\Gustav\Attribute\{Body, Get, Post, Query};
+
+#[Post('/dogs')]
 public function create(#[Body] CreateDogInput $input): Controller\Response
 {
     return $this->json([
@@ -152,7 +157,7 @@ public function create(#[Body] CreateDogInput $input): Controller\Response
     ], 201);
 }
 
-#[Route('/dogs')]
+#[Get('/dogs')]
 public function list(#[Query] DogSearchInput $input): Controller\Response
 {
     // Query-string scalar values are converted before construction.

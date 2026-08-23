@@ -7,7 +7,7 @@ Gustav has one recursive JSON pipeline for typed controller returns, `json()`, a
 Return a declared PHP value directly and Gustav serializes it as JSON. Constructor-promoted, readonly output DTOs are the canonical style:
 
 ```php
-use GustavPHP\Gustav\Attribute\Route;
+use GustavPHP\Gustav\Attribute\Get;
 
 enum DogState: string
 {
@@ -36,7 +36,7 @@ final readonly class DogOutput
     }
 }
 
-#[Route('/dogs/{id}')]
+#[Get('/dogs/{id}')]
 public function show(): DogOutput
 {
     return new DogOutput(
@@ -66,7 +66,9 @@ The response has status `200`, content type `application/json`, and this body:
 Direct JSON responses use status `200`. When a route needs a different status or custom headers, return a Gustav response through `json()`:
 
 ```php
-#[Route('/dogs')]
+use GustavPHP\Gustav\Attribute\Post;
+
+#[Post('/dogs')]
 public function create(): Controller\Response
 {
     return $this->json(
@@ -77,7 +79,7 @@ public function create(): Controller\Response
 }
 ```
 
-Handlers must declare exactly one named return type. A non-null Gustav response or PSR-7 `ResponseInterface` passes through unchanged; every other supported type is inferred as JSON. Nullable types such as `?DogOutput` are accepted and serialize `null` as JSON `null`. Ambiguous unions, `mixed`, `object`, and `void` are rejected when routes are registered.
+Handlers must declare exactly one named return type. A non-null Gustav response or PSR-7 `ResponseInterface` passes through unchanged; every other supported type is inferred as JSON. Nullable types such as `?DogOutput` are accepted and serialize `null` as JSON `null`. Ambiguous unions, `mixed`, `object`, and `void` are rejected when routes are compiled.
 
 ## Supported values
 
@@ -135,7 +137,9 @@ Use additional properties sparingly; declared readonly properties provide a clea
 Use `json()` when a handler needs to choose its status or body at run time while still returning `Controller\Response`:
 
 ```php
-#[Route('/dogs/{id}')]
+use GustavPHP\Gustav\Attribute\Get;
+
+#[Get('/dogs/{id}')]
 public function show(): Controller\Response
 {
     return $this->json(new DogOutput(/* ... */), status: 200);

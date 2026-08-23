@@ -7,7 +7,9 @@ Request binding enforces presence, nullability, and PHP types before a controlle
 A controller argument is required unless it has a PHP default:
 
 ```php
-#[Route('/dogs')]
+use GustavPHP\Gustav\Attribute\{Get, Query};
+
+#[Get('/dogs')]
 public function list(
     #[Query('owner')] string $owner,
     #[Query('page')] int $page = 1,
@@ -22,10 +24,10 @@ Here, `owner` is required and `page` is optional. A nullable type accepts explic
 Place `#[Validate]` next to the input-source attribute. Rules receive the converted PHP value:
 
 ```php
-use GustavPHP\Gustav\Attribute\{Query, Route, Validate};
+use GustavPHP\Gustav\Attribute\{Get, Query, Validate};
 use GustavPHP\Gustav\Validation\Common\{Email, Integer};
 
-#[Route('/dogs')]
+#[Get('/dogs')]
 public function list(
     #[Query('owner')]
     #[Validate(new Email())]
@@ -55,7 +57,7 @@ Rules run only for values supplied by the request. PHP defaults are trusted as p
 Attach rules to promoted constructor parameters:
 
 ```php
-use GustavPHP\Gustav\Attribute\Validate;
+use GustavPHP\Gustav\Attribute\{Body, Post, Validate};
 use GustavPHP\Gustav\Validation\Common\{Email, Integer, Nullable, Text};
 
 final readonly class RegisterInput
@@ -74,7 +76,7 @@ final readonly class RegisterInput
     }
 }
 
-#[Route('/register', Method::POST)]
+#[Post('/register')]
 public function register(#[Body] RegisterInput $input): Controller\Response
 {
     // The DTO is fully converted and valid here.
@@ -102,7 +104,7 @@ Rules live in `GustavPHP\Gustav\Validation\Common`:
 
 ## Controller validation helper
 
-Controllers can validate values assembled inside the handler with the existing `validate()` helper. Add an optional third tuple item to identify the field path:
+Controllers extending `Controller\Base` can validate values assembled inside the handler with its `validate()` helper. Add an optional third tuple item to identify the field path:
 
 ```php
 $this->validate([

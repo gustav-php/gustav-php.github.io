@@ -1,49 +1,131 @@
 # Routing
 
-You use the `GustavPHP\Gustav\Attribute\Route` attribute to define an endpoint.
+Mark a controller and give it a shared path prefix, then use concise HTTP
+method attributes on its handlers:
 
 ```php
-#[Route('/dogs')]
-public function list(): Controller\Response
+use GustavPHP\Gustav\Attribute\{Body, Controller, Delete, Get, Param, Patch, Post};
+
+#[Controller('/dogs')]
+final readonly class DogsController
 {
-    return $this->json([]);
+    #[Get]
+    public function list(): array
+    {
+        return [];
+    }
+
+    #[Post]
+    public function create(#[Body] CreateDogInput $input): DogOutput
+    {
+        // ...
+    }
+
+    #[Patch('/{dog}')]
+    public function update(#[Param('dog')] int $id): DogOutput
+    {
+        // ...
+    }
+
+    #[Delete('/{dog}')]
+    public function delete(#[Param('dog')] int $id): bool
+    {
+        // ...
+    }
 }
 ```
 
-By default the `GET` method is used, however you can pass a method using the `GustavPHP\Gustav\Router\Method` enum.
+`#[Get]`, `#[Post]`, `#[Put]`, `#[Patch]`, `#[Delete]`, `#[Head]`, and
+`#[Options]` are available. The generic `#[Route]` attribute accepts a
+`Router\Method` when a less common HTTP method is required.
+
+The controller prefix and method path are joined once at startup. Both default
+to the root path, so `#[Controller('/dogs')]` with `#[Get]` registers
+`GET /dogs`.
+
+## Path parameters
+
+Surround one complete path segment with braces and bind it with `#[Param]`:
 
 ```php
-#[Route('/dogs', Method::POST)]
-public function create(): Controller\Response
+#[Get('/{dog}')]
+public function show(#[Param('dog')] int $id): DogOutput
 {
-    return $this->json([], 201);
+    return $this->dogs->find($id);
 }
 ```
 
-You can also use parameters in your path by surround a path segment with curly braces. You can access a param by using the `GustavPHP\Gustav\Attribute\Param` attribute in the arguments.
-
-The argument passed to the attribute must match the one from the desired path segment.
+The external placeholder and PHP argument can have different names. Multiple
+parameters work the same way:
 
 ```php
-#[Route('/dogs/{dog}')]
-public function show(#[Param('dog')] string $id): Controller\Response
+#[Get('/{dog}/collars/{collar}')]
+public function collar(
+    #[Param('dog')] int $dogId,
+    #[Param('collar')] int $collarId,
+): CollarOutput {
+    // ...
+}
+```
+
+Placeholder names must start with a letter or underscore and contain only
+letters, numbers, and underscores. Unknown or repeated placeholders fail
+startup. Static routes take precedence over parameter routes, so `/dogs/new`
+is matched before `/dogs/{dog}`.
+
+## Named routes and URL generation
+
+Give a route a stable name and inject `UrlGeneratorInterface` wherever links or
+redirects are built:
+
+```php
+use GustavPHP\Gustav\Attribute\{Controller, Get, Param};
+use GustavPHP\Gustav\Router\UrlGeneratorInterface;
+
+#[Controller('/dogs')]
+final readonly class DogsController
 {
-    return $this->json(['id' => $id]);
+    public function __construct(private UrlGeneratorInterface $urls)
+    {
+    }
+
+    #[Get('/{dog}', name: 'dogs.show')]
+    public function show(#[Param('dog')] int $id): DogOutput
+    {
+        // ...
+    }
+
+    #[Get('/featured')]
+    public function featured(): array
+    {
+        return [
+            'url' => $this->urls->generate(
+                'dogs.show',
+                ['dog' => 42],
+                ['ref' => 'featured'],
+            ),
+        ];
+    }
 }
 ```
 
-Of course you can use multiple parameters.
+The generated value is `/dogs/42?ref=featured`. Path values are URL-encoded;
+missing and unknown parameters throw immediately. Route names are unique across
+the application and are validated during startup.
 
-```php
-#[Route('/dogs/{dog}/collars/{collar}')]
-public function getCollar(
-    #[Param('dog')] string $id,
-    #[Param('collar')] string $collar
-): Controller\Response {
-    return $this->json(compact('id', 'collar'));
-}
-```
+## HEAD, OPTIONS, and method errors
 
-The framework uses an internal router to match incoming requests to the defined routes.
+A `HEAD` request uses the matching `GET` handler when no explicit `#[Head]`
+handler exists, then removes the response body while preserving its status and
+headers. Gustav answers `OPTIONS` automatically with status `204` and an
+`Allow` header unless the route declares an explicit `#[Options]` handler.
 
-The router is parsing all routes upfront and stores them in a hashmap on start. This way the router can match the incoming request to the correct route in O(1) time.
+When a path exists for another method, Gustav returns `405` with every allowed
+method, including inferred `HEAD` and `OPTIONS`. An unknown path returns `404`.
+
+## Compilation
+
+Attributes contain metadata only. Gustav compiles immutable route definitions
+and validates the complete table once during startup. The router is scoped to
+the application instance; it does not keep static route state between
+applications or RoadRunner workers.

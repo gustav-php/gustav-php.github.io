@@ -1,13 +1,13 @@
 # Response
 
-Every route declares exactly one response type. Gustav and PSR-7 response objects pass through unchanged; any other supported declared type is serialized as JSON. Gustav compiles that decision when the route is registered.
+Every route declares exactly one response type. Gustav and PSR-7 response objects pass through unchanged; any other supported declared type is serialized as JSON. Gustav compiles that decision with the route table during startup.
 
 ## Typed JSON
 
 Return a DTO, array, scalar, backed enum, or nullable value directly. No response marker is required:
 
 ```php
-use GustavPHP\Gustav\Attribute\Route;
+use GustavPHP\Gustav\Attribute\Get;
 
 final readonly class DogOutput
 {
@@ -18,7 +18,7 @@ final readonly class DogOutput
     }
 }
 
-#[Route('/dogs/{id}')]
+#[Get('/dogs/{id}')]
 public function show(): DogOutput
 {
     return new DogOutput(42, 'Rex');
@@ -27,12 +27,15 @@ public function show(): DogOutput
 
 Gustav returns status `200`, supplies `Content-Type: application/json`, and recursively normalizes the value. See [Serialization](./serialization.md) for supported values, readonly DTOs, enums, exclusions, and failure behavior.
 
+The remaining convenience helpers on this page are protected methods supplied
+by the optional `Controller\Base` class.
+
 ## HTML
 
-Use `html()` to return HTML content:
+Controllers extending `Controller\Base` can use `html()` to return HTML content:
 
 ```php
-#[Route('/html')]
+#[Get('/html')]
 public function index(): Controller\Response
 {
     return $this->html('<h1>Hello World!</h1>');
@@ -44,9 +47,9 @@ public function index(): Controller\Response
 Use `json()` when the body is selected dynamically or the response needs a non-default status or custom headers:
 
 ```php
-use GustavPHP\Gustav\Router\Method;
+use GustavPHP\Gustav\Attribute\Post;
 
-#[Route('/dogs', Method::POST)]
+#[Post('/dogs')]
 public function create(): Controller\Response
 {
     return $this->json([
@@ -95,10 +98,11 @@ New code should prefer returning plain readonly output DTOs directly. Both APIs 
 A controller may return a PSR-7 response directly:
 
 ```php
+use GustavPHP\Gustav\Attribute\Get;
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 
-#[Route('/accepted')]
+#[Get('/accepted')]
 public function accepted(): ResponseInterface
 {
     return new Response(202, ['Content-Type' => 'text/plain'], 'accepted');
