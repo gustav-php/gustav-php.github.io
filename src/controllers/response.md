@@ -157,6 +157,8 @@ In production this becomes:
 ```
 
 Authentication exceptions use this mechanism for `401` and `403` responses.
+CSRF rejection is also a typed `403` request error with the stable message
+`CSRF token is invalid`.
 
 Do not encode an HTTP status in a generic exception's numeric code. Only typed `HttpException` instances control the response status; an unexpected exception such as `new RuntimeException('failure', 422)` is still a `500`.
 

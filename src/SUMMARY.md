@@ -17,6 +17,7 @@
 - [Logging and request IDs](./logging.md)
 - [Middlewares](./middlewares.md)
 - [Authentication](./authentication.md)
+- [Sessions and CSRF](./sessions.md)
 - [Testing](./testing.md)
 - [Typed events](./events.md)
 - [Views](./views.md)

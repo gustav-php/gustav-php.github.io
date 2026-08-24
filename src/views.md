@@ -122,6 +122,16 @@ unvalidated request or database content to it:
 Static HTML written directly in a template is trusted application code.
 `section()` and `partial()` return rendered HTML and can be echoed directly.
 
+Use the same escaping helper for a generated CSRF token in state-changing
+forms:
+
+```php
+<input type="hidden" name="_token" value="<?= $view->escape($csrfToken) ?>">
+```
+
+Generate the value with the injected `CsrfTokenManager` and protect the target
+route with `#[Csrf]`. See [Sessions and CSRF](./sessions.md#protecting-routes-from-csrf).
+
 ## Layouts and sections
 
 Declare a layout from a page template. Output from the page becomes the
