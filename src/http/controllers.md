@@ -59,8 +59,8 @@ public function create(#[Body] CreateDogInput $input): DogOutput
 }
 ```
 
-See [Routing](./routing.md), [Request input](./request.md),
-[Validation](./validation.md), and [Responses](./response.md) for the complete
+See [Routing](./routing.md), [Request input](./request-input.md),
+[Validation](./validation.md), and [Responses](./responses.md) for the complete
 controller API.
 
 ## Discovery and startup

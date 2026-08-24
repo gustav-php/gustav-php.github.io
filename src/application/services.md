@@ -180,21 +180,21 @@ During HTTP requests, Gustav automatically provides these framework services:
 - `Service\Container`, resolving to the active scope
 
 Commands receive their own active scope with Symfony's input, output, and
-`SymfonyStyle` services. See [Application commands](./commands.md) for the
+`SymfonyStyle` services. See [Commands](./commands.md) for the
 complete command contract.
 
 Prefer injecting the specific dependency a class needs. Declarative factories
 also use constructor injection and do not receive the container in
 `__invoke()`.
 
-See [Logging and request IDs](./logging.md) for writing PSR-3 records,
+See [Logging](../operations/logging.md) for writing PSR-3 records,
 correlating them with requests, and replacing the default logger through
 service discovery.
 
 The default session store is a singleton. A discovered singleton
 `#[Service(as: SessionStoreInterface::class)]` replaces it before requests are
 handled, while `Session` and `CsrfTokenManager` remain isolated to the active
-request. See [Sessions and CSRF](./sessions.md#storage-and-deployment).
+request. See [Sessions and CSRF](../security/sessions-and-csrf.md#storage-and-deployment).
 
 ## Service providers
 

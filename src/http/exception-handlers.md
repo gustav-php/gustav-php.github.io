@@ -100,7 +100,7 @@ final readonly class CheckoutUnavailableHandler
 ```
 
 `View` responses use the configured application renderer. See
-[Responses](./controllers/response.md) and [Views](./views.md) for the response
+[Responses](./responses.md) and [Views](./views.md) for the response
 APIs.
 
 ## Discovery and dependency injection
@@ -191,7 +191,7 @@ application handler when a domain exception should stay independent of HTTP.
 Domain exceptions from controllers and their middleware are mapped before the
 response unwinds through application-wide middleware. That middleware can
 inspect or amend the mapped response just like a successful response. See
-[Middleware](./middlewares.md#mapped-error-responses).
+[Middleware](./middleware.md#mapped-error-responses).
 
 The mapped response status controls automatic reporting:
 

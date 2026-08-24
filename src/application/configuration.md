@@ -207,4 +207,4 @@ Direct construction reads real process variables for typed application
 configuration. Pass an explicit `Environment` when another source is required.
 The framework `Configuration` object itself remains injectable as a singleton.
 Direct construction disables sessions unless `session` is supplied. See
-[Sessions and CSRF](./sessions.md) for cookie options and custom shared stores.
+[Sessions and CSRF](../security/sessions-and-csrf.md) for cookie options and custom shared stores.

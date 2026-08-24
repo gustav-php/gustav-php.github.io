@@ -130,7 +130,7 @@ forms:
 ```
 
 Generate the value with the injected `CsrfTokenManager` and protect the target
-route with `#[Csrf]`. See [Sessions and CSRF](./sessions.md#protecting-routes-from-csrf).
+route with `#[Csrf]`. See [Sessions and CSRF](../security/sessions-and-csrf.md#protecting-routes-from-csrf).
 
 ## Layouts and sections
 

@@ -62,7 +62,7 @@ Responses pass back through the same middleware in reverse order.
 Framework session handling wraps this pipeline when sessions are enabled.
 `#[Csrf]` validation runs after application-wide middleware and before
 controller or route middleware, request binding, and controller execution.
-See [Sessions and CSRF](./sessions.md#protecting-routes-from-csrf).
+See [Sessions and CSRF](../security/sessions-and-csrf.md#protecting-routes-from-csrf).
 
 ## Mapped error responses
 

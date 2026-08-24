@@ -67,7 +67,7 @@ automatically capture query parameters, request bodies, headers, cookies,
 identity data, or client IP addresses. Add application context deliberately
 and avoid credentials, tokens, and personal data.
 
-[Application exception handlers](./exception-handlers.md) follow the mapped
+[Application exception handlers](../http/exception-handlers.md) follow the mapped
 response status. A mapped `4xx` remains quiet; a mapped `5xx` reports the
 original domain exception exactly once with the mapped status. If the handler
 itself fails, Gustav reports that handler failure as a `500` and does not run a
@@ -138,7 +138,7 @@ final class ApplicationLogger extends AbstractLogger
 }
 ```
 
-Use a [service factory](./services.md#third-party-objects-with-factories) when a
+Use a [service factory](../application/services.md#third-party-objects-with-factories) when a
 third-party logger needs typed configuration or library-specific setup. Keep a
 logger singleton unless it intentionally depends on scoped state; add the
 `RequestId` to ordinary application records explicitly when you need
