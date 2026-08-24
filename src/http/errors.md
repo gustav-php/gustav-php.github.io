@@ -88,6 +88,16 @@ A validation response contains every detected field violation:
 controller-side validation. Nested paths use dot notation. Messages on expected
 request errors are safe to return to clients.
 
+## Development and production
+
+Error responses differ by mode only when a debug page is useful:
+
+| Error                         | Development     | Production                       |
+| ----------------------------- | --------------- | -------------------------------- |
+| Request or validation error   | Structured JSON | Structured JSON                  |
+| Regular `HttpException`       | Debug page      | Declared status and safe message |
+| Unexpected exception or error | Debug page      | Safe `500` JSON                  |
+
 ## Unexpected errors
 
 Production responses do not include unexpected exception messages, class
@@ -102,9 +112,9 @@ names, files, or traces:
 }
 ```
 
-Development mode shows a debug page. In production, every `5xx` is reported
-through `Psr\Log\LoggerInterface`; expected `4xx` responses are not logged
-automatically. See [Logging](../operations/logging.md) for the recorded context.
+In production, every `5xx` is reported through `Psr\Log\LoggerInterface`;
+expected `4xx` responses are not logged automatically. See
+[Logging](../operations/logging.md) for the recorded context.
 
 ## Request IDs
 

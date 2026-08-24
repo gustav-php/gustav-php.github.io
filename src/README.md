@@ -23,14 +23,6 @@ final readonly class HelloController
 }
 ```
 
-Create and run a project with Composer:
-
-```bash
-composer create-project gustav-php/starter example-app
-cd example-app
-php gustav dev
-```
-
-Continue with [Installation](./getting-started/installation.md) for the local
-requirements and then build your
+Start with [Installation](./getting-started/installation.md) to create and run
+a project, then build your
 [first endpoint](./getting-started/first-endpoint.md).
