@@ -103,8 +103,7 @@ final class SecurityHeadersMiddleware extends Base
 ```
 
 Lower priorities run earlier on the way in and later on the way out.
-Application-wide middleware is resolved through the service container without
-entrypoint registration.
+Application-wide middleware supports constructor injection.
 
 Gustav creates and validates the request ID before application-wide middleware
 runs. Inject `GustavPHP\Gustav\Http\RequestId` when middleware needs it; do not

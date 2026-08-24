@@ -101,7 +101,8 @@ Missing required input, disallowed `null`, and conversion failures produce a str
 
 ## Type conversion
 
-Gustav converts only the following request types. It rejects ambiguous unions such as `int|string` when compiling the route.
+Gustav converts only the following request types. Ambiguous unions such as
+`int|string` are rejected when the application starts.
 
 | PHP type    | Accepted input                                          |
 | ----------- | ------------------------------------------------------- |
@@ -113,7 +114,8 @@ Gustav converts only the following request types. It rejects ambiguous unions su
 | `?T`        | The values accepted by `T`, plus explicit `null`        |
 | backed enum | A valid value of its string or integer backing type     |
 
-Conversion is deterministic: arrays are not coerced to strings, arbitrary objects are not cast, and invalid enum values are rejected.
+Arrays are not coerced to strings, arbitrary objects are not cast, and invalid
+enum values are rejected.
 
 ## Constructor-based DTOs
 

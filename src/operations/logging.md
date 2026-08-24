@@ -1,8 +1,8 @@
 # Logging and request IDs
 
-Gustav provides a PSR-3 logger and a request ID without application bootstrap
-code. Constructor-inject `Psr\Log\LoggerInterface` wherever application code
-needs to write a log:
+Constructor-inject `Psr\Log\LoggerInterface` wherever application code needs to
+write a log. Inject `RequestId` when the record should correlate with an HTTP
+request:
 
 ```php
 use GustavPHP\Gustav\Http\RequestId;
@@ -76,7 +76,7 @@ fallback handler recursively.
 Unexpected exception details remain hidden from production HTTP responses;
 they are available to the logger instead. If an application logger throws
 while Gustav is reporting a server failure, Gustav writes the record through
-its built-in fallback logger and keeps the worker alive.
+its built-in fallback logger.
 
 Unexpected application-command exceptions use the same reporter. Their record
 message is `Command failed` and the context contains `command` plus the
@@ -116,8 +116,7 @@ Middleware can also read it from the PSR-7 request using
 
 ## Replacing the logger
 
-Bind any PSR-3 implementation with a discovered service. No entrypoint call is
-required:
+Register any PSR-3 implementation as a singleton service:
 
 ```php
 use GustavPHP\Gustav\Attribute\Service;

@@ -25,8 +25,7 @@ final readonly class DogsController
 }
 ```
 
-Controllers do not need to extend a framework class. Return a `View` directly
-for HTML templates:
+Return a `View` directly for HTML templates:
 
 ```php
 use GustavPHP\Gustav\Attribute\{Controller, Get};

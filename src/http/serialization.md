@@ -80,7 +80,7 @@ public function create(): Controller\Response
 }
 ```
 
-Handlers must declare exactly one named return type. A non-null Gustav response or PSR-7 `ResponseInterface` passes through unchanged; every other supported type is inferred as JSON. Nullable types such as `?DogOutput` are accepted and serialize `null` as JSON `null`. Ambiguous unions, `mixed`, `object`, and `void` are rejected when routes are compiled.
+Handlers must declare exactly one named return type. A non-null Gustav response or PSR-7 `ResponseInterface` passes through unchanged; every other supported type is inferred as JSON. Nullable types such as `?DogOutput` are accepted and serialize `null` as JSON `null`. Ambiguous unions, `mixed`, `object`, and `void` are rejected when the application starts.
 
 ## Supported values
 
