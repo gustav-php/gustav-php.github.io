@@ -63,11 +63,11 @@ See [Routing](./routing.md), [Request input](./request-input.md),
 [Validation](./validation.md), and [Responses](./responses.md) for the complete
 controller API.
 
-## Discovery and startup
+## Custom namespaces
 
-Gustav discovers `#[Controller]` classes recursively in the `Routes` namespace
-below the configured application namespace. Additional namespaces can be
-listed in `routeNamespaces`.
+Place controllers in the `Routes` namespace below the configured application
+namespace. List controllers from shared packages or modules in
+`routeNamespaces`:
 
 ```php
 use GustavPHP\Gustav\{Configuration, Mode};
@@ -80,8 +80,3 @@ return new Configuration(
     ],
 );
 ```
-
-Gustav compiles an immutable route table, request binder, response handler, and
-middleware list once during application startup. Duplicate or ambiguous paths,
-duplicate names, invalid placeholders, non-public handlers, and invalid input
-or response signatures fail before the server begins accepting requests.

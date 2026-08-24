@@ -31,9 +31,8 @@ class TimingMiddleware extends Base
 
 Attach middleware to a controller to run it for every route in that class.
 Attach it to a route method for one endpoint. The attribute is repeatable and
-takes a middleware class name. Gustav compiles this metadata when the route
-table is built and resolves the middleware through the application container for
-each request.
+takes a middleware class name. Middleware classes support constructor
+injection.
 
 ```php
 use GustavPHP\Gustav\Attribute\{Controller, Get, Middleware};

@@ -39,9 +39,8 @@ final readonly class DogsController
 `#[Options]` are available. The generic `#[Route]` attribute accepts a
 `Router\Method` when a less common HTTP method is required.
 
-The controller prefix and method path are joined once at startup. Both default
-to the root path, so `#[Controller('/dogs')]` with `#[Get]` registers
-`GET /dogs`.
+The controller prefix and method path are joined. Both default to the root path,
+so `#[Controller('/dogs')]` with `#[Get]` registers `GET /dogs`.
 
 ## Path parameters
 
@@ -123,9 +122,13 @@ headers. Gustav answers `OPTIONS` automatically with status `204` and an
 When a path exists for another method, Gustav returns `405` with every allowed
 method, including inferred `HEAD` and `OPTIONS`. An unknown path returns `404`.
 
-## Compilation
+## Invalid routes
 
-Attributes contain metadata only. Gustav compiles immutable route definitions
-and validates the complete table once during startup. The router is scoped to
-the application instance; it does not keep static route state between
-applications or RoadRunner workers.
+Gustav validates routes when the application starts. Startup fails when routes
+contain:
+
+- duplicate or ambiguous paths;
+- duplicate route names;
+- invalid or unknown placeholders;
+- non-public handlers; or
+- invalid request input or response types.

@@ -1,6 +1,8 @@
 # Request input
 
-Controller arguments can bind directly to an HTTP request. Add one input attribute to each argument and declare the PHP type Gustav should produce. Route signatures are checked when the application compiles its route table, and their binding metadata is reused for every request.
+Controller arguments can bind directly to an HTTP request. Add one input
+attribute to each argument and declare the PHP type Gustav should produce.
+Invalid input declarations fail when the application starts.
 
 | Attribute     | Input                    |
 | ------------- | ------------------------ |

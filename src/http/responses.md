@@ -2,12 +2,11 @@
 
 Every route declares exactly one response type. Gustav and PSR-7 response
 objects pass through unchanged, `View` responses render as HTML, and other
-supported declared types are serialized as JSON. Gustav compiles that decision
-with the route table during startup.
+supported declared types are serialized as JSON.
 
 ## Typed JSON
 
-Return a DTO, array, scalar, backed enum, or nullable value directly. No response marker is required:
+Return a DTO, array, scalar, backed enum, or nullable value directly:
 
 ```php
 use GustavPHP\Gustav\Attribute\Get;
@@ -49,8 +48,8 @@ The response uses `text/html; charset=utf-8`. Views can also carry a custom
 status and headers. See [Views](./views.md) for typed view models, escaping,
 layouts, partials, and renderer replacement.
 
-The remaining convenience helpers on this page are protected methods supplied
-by the optional `Controller\Base` class.
+Controllers extending `Controller\Base` can use the following protected
+response helpers.
 
 ## HTML
 
@@ -104,16 +103,6 @@ Use `redirect()` with a destination and, optionally, a status:
 ```php
 return $this->redirect('/dogs');
 ```
-
-## Legacy serializer
-
-Existing `Serializer\Base` classes can still use `serialize()`:
-
-```php
-return $this->serialize(new Dog());
-```
-
-New code should prefer returning plain readonly output DTOs directly. Both APIs use the same serialization pipeline.
 
 ## PSR-7 response
 

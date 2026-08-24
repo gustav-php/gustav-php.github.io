@@ -248,5 +248,4 @@ HEAD behavior from the `View` response.
 Missing templates, invalid paths, cycles, template exceptions, and renderer
 failures are unexpected server errors. Development mode renders the framework's
 debug page. Production returns the same safe JSON `500` used for other internal
-exceptions and never exposes template names or paths. The failed request is
-isolated and the RoadRunner worker continues serving subsequent requests.
+exceptions and never exposes template names or paths.
