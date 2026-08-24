@@ -183,3 +183,7 @@ See [Validation](./validation.md) for attaching rules to DTO fields.
 Server-parsed multipart and regular form bodies continue to work. Reading a raw body preserves the position of a seekable PSR-7 stream.
 
 Malformed JSON returns `400`. A non-empty raw body with an unsupported media type returns `415` when body binding is required. Syntactically valid JSON that cannot satisfy the declared PHP types returns `422`. See [Responses](./response.md#request-input-errors) for the JSON error format.
+
+On a `#[Csrf]` route, the reserved form field `_token` is validated and removed
+before this binding pipeline runs. JSON clients can supply the token through
+`X-CSRF-Token`. See [Sessions and CSRF](../sessions.md#protecting-routes-from-csrf).

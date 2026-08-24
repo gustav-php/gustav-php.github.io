@@ -25,6 +25,11 @@ $request = (new ServerRequest('POST', '/dogs'))
 $response = $app->handle($request);
 ```
 
+For session tests, reuse the `Set-Cookie` ID through `withCookieParams()` on a
+later request. Point `SessionOptions` at an isolated temporary directory, or
+register an in-memory `SessionStoreInterface` as a discovered singleton. This
+exercises the same request-scoped session and CSRF middleware as RoadRunner.
+
 RoadRunner remains the production transport used by `Application::run()`; the
 request behavior is shared by both entry points.
 

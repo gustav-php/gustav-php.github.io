@@ -121,6 +121,8 @@ During HTTP requests, Gustav automatically provides these framework services:
 - `View\ViewRendererInterface` for HTML view responses
 - `ServerRequestInterface` for the active request
 - `Http\RequestId` for the active request
+- `Session` for lazy server-side request state
+- `Security\CsrfTokenManager` for form and request tokens
 - `Service\Container`, resolving to the active scope
 
 Commands receive their own active scope with Symfony's input, output, and
@@ -134,6 +136,11 @@ dynamic service lookup.
 See [Logging and request IDs](./logging.md) for writing PSR-3 records,
 correlating them with requests, and replacing the default logger through
 service discovery.
+
+The default session store is a singleton. A discovered singleton
+`#[Service(as: SessionStoreInterface::class)]` replaces it before requests are
+handled, while `Session` and `CsrfTokenManager` remain isolated to the active
+request. See [Sessions and CSRF](./sessions.md#storage-and-deployment).
 
 ## Service providers
 

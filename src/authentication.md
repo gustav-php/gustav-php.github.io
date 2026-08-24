@@ -101,3 +101,8 @@ the corresponding `WWW-Authenticate` challenge. `#[AuthUser]` also produces a
 `401` response if no authentication middleware supplied an identity. Throw
 `Auth\Exception\ForbiddenException` when an authenticated identity lacks the
 required permission; Gustav maps it to a `403` response.
+
+These built-in authenticators read request credentials; they do not create a
+login session. When an application authenticates users with a session cookie,
+regenerate the session ID after login, invalidate it on logout, and protect
+unsafe routes with `#[Csrf]`. See [Sessions and CSRF](./sessions.md).

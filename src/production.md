@@ -14,6 +14,13 @@ variable and field name, but not its rejected raw value.
 Workers capture configuration once at startup. Restart them after changing an
 environment variable.
 
+Conventional sessions use `storage/sessions`, so the worker needs write access
+to that directory. The file store coordinates multiple RoadRunner workers on
+one host. Deployments with multiple application replicas need a discovered
+shared `SessionStoreInterface` implementation with per-session locking; local
+files on separate hosts do not share state. See
+[Sessions and CSRF](./sessions.md#storage-and-deployment).
+
 Application commands use the same production mode. Unexpected command
 exceptions are logged with the command name while console output remains the
 safe message `Command failed`.

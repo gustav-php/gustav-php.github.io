@@ -21,6 +21,7 @@ The minimal starter structure is:
 │  ├─ Routes/
 │  ├─ Serializers/
 │  └─ Services/
+├─ storage/
 ├─ views/
 └─ gustav
 ```
@@ -38,6 +39,10 @@ The `public/` directory contains static files exposed from the site root.
 The `views/` directory contains native PHP templates using the `.phtml`
 extension. PHP's normal opcode cache handles compiled code in production;
 Gustav does not require a writable view cache directory.
+
+The ignored `storage/` directory contains runtime data. Conventional projects
+create `storage/sessions/` lazily when session state is first used; the worker
+must be able to write there.
 
 The `src/` directory contains all the components that build your application:
 

@@ -18,10 +18,11 @@ return Configuration::forProject(
 accepts `MODE=development` or `MODE=production`. It configures these paths
 relative to the supplied project root:
 
-| Setting      | Conventional path |
-| ------------ | ----------------- |
-| Static files | `public/`         |
-| Views        | `views/`          |
+| Setting         | Conventional path   |
+| --------------- | ------------------- |
+| Static files    | `public/`           |
+| Views           | `views/`            |
+| Session storage | `storage/sessions/` |
 
 ## Typed application configuration
 
@@ -174,6 +175,9 @@ Construct `Configuration` directly when the project does not use the
 conventional directories:
 
 ```php
+use GustavPHP\Gustav\{Configuration, Mode};
+use GustavPHP\Gustav\Session\SessionOptions;
+
 $configuration = new Configuration(
     mode: Mode::Production,
     namespace: 'App',
@@ -186,9 +190,12 @@ $configuration = new Configuration(
     middlewareNamespaces: ['Module\Billing\Middlewares'],
     configurationNamespaces: ['Module\Billing\Config'],
     commandNamespaces: ['Module\Billing\Commands'],
+    session: new SessionOptions(directory: '/srv/example/var/sessions/'),
 );
 ```
 
 Direct construction reads real process variables for typed application
 configuration. Pass an explicit `Environment` when another source is required.
 The framework `Configuration` object itself remains injectable as a singleton.
+Direct construction disables sessions unless `session` is supplied. See
+[Sessions and CSRF](./sessions.md) for cookie options and custom shared stores.

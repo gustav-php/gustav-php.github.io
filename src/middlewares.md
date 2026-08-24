@@ -59,6 +59,11 @@ Middleware runs in this order on the way in:
 
 Responses pass back through the same middleware in reverse order.
 
+Framework session handling wraps this pipeline when sessions are enabled.
+`#[Csrf]` validation runs after application-wide middleware and before
+controller or route middleware, request binding, and controller execution.
+See [Sessions and CSRF](./sessions.md#protecting-routes-from-csrf).
+
 ## Application-wide middleware
 
 Mark middleware that should wrap every request with `#[GlobalMiddleware]`.
