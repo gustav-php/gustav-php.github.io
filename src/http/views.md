@@ -1,8 +1,6 @@
 # Views
 
-Gustav renders native PHP templates without requiring a third-party template
-engine. Return a `View` from any controller; extending `Controller\Base` is not
-required:
+Gustav renders native PHP templates from `View` responses:
 
 ```php
 namespace App\Routes;
@@ -130,7 +128,7 @@ forms:
 ```
 
 Generate the value with the injected `CsrfTokenManager` and protect the target
-route with `#[Csrf]`. See [Sessions and CSRF](./sessions.md#protecting-routes-from-csrf).
+route with `#[Csrf]`. See [Sessions and CSRF](../security/sessions-and-csrf.md#protecting-routes-from-csrf).
 
 ## Layouts and sections
 
@@ -193,8 +191,8 @@ Partials receive their own data and rendering context:
 <article><?= $view->escape($dog->name) ?></article>
 ```
 
-Sections and layouts cannot leak between partials or later RoadRunner requests.
-Recursive partial chains are rejected.
+Each render starts with empty section and layout state. Recursive partial chains
+are rejected.
 
 ## Optional controller helper
 
@@ -208,14 +206,12 @@ public function index(): View
 }
 ```
 
-New controllers can return `new View(...)` directly and remain plain classes.
+A controller may also return `new View(...)` directly.
 
 ## Replacing the renderer
 
-`ViewRendererInterface` separates controller responses from the native PHP
-renderer. Define one discovered singleton service to integrate Twig or another
-engine. Application service discovery replaces Gustav's default automatically;
-no `$app->...` setup is needed:
+Implement `ViewRendererInterface` and register it as a singleton service to use
+Twig or another template engine:
 
 ```php
 namespace App\Services;
@@ -248,5 +244,4 @@ HEAD behavior from the `View` response.
 Missing templates, invalid paths, cycles, template exceptions, and renderer
 failures are unexpected server errors. Development mode renders the framework's
 debug page. Production returns the same safe JSON `500` used for other internal
-exceptions and never exposes template names or paths. The failed request is
-isolated and the RoadRunner worker continues serving subsequent requests.
+exceptions and never exposes template names or paths.

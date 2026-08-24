@@ -19,7 +19,7 @@ to that directory. The file store coordinates multiple RoadRunner workers on
 one host. Deployments with multiple application replicas need a discovered
 shared `SessionStoreInterface` implementation with per-session locking; local
 files on separate hosts do not share state. See
-[Sessions and CSRF](./sessions.md#storage-and-deployment).
+[Sessions and CSRF](../security/sessions-and-csrf.md#storage-and-deployment).
 
 Application commands use the same production mode. Unexpected command
 exceptions are logged with the command name while console output remains the
@@ -47,7 +47,7 @@ logs:
 
 Gustav automatically reports every `5xx` once and adds `X-Request-ID` to every
 response. Expected `4xx` responses are not logged automatically. See
-[Logging and request IDs](./logging.md) for the record shape, safe context, and
+[Logging](./logging.md) for the record shape, safe context, and
 custom PSR-3 logger bindings.
 
 Do not print from application code under RoadRunner. Worker `STDOUT` carries

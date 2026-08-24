@@ -1,8 +1,7 @@
 # Application services
 
-Controllers, middleware, and services use the same constructor-injection
-container. Services are ordinary PHP classes; they do not need to extend a
-framework base class.
+Controllers, middleware, and services support constructor injection. Use
+`#[Service]` to bind an interface or abstract class to an implementation:
 
 ```php
 use GustavPHP\Gustav\Attribute\Service;
@@ -97,14 +96,12 @@ final readonly class DatabaseFactory
 Place the class under the application `Services` namespace. Gustav autowires
 the factory constructor and uses the non-nullable `__invoke()` return type as
 the product's service identifier. In this example, any controller or service
-can inject `PDO` directly. The factory class itself does not need to be
-registered or injected.
+can inject `PDO` directly.
 
-Factory products are lazy: Gustav constructs and invokes the factory only when
-`PDO` is first requested. The selected lifetime belongs to the returned
-product, not the short-lived factory object. `Lifetime::Scoped` is the default;
-choose `Singleton` only when the object and all of its dependencies are safe to
-share across requests and commands.
+The factory runs when `PDO` is first requested. Its configured lifetime applies
+to the returned product. `Lifetime::Scoped` is the default; choose `Singleton`
+only when the product and all of its dependencies are safe to share across
+requests and commands.
 
 Gustav validates factory declarations during startup. A factory must be an
 instantiable class with exactly one `#[Factory]` attribute and a public,
@@ -113,11 +110,10 @@ existing, non-nullable class or interface; scalar, union, and intersection
 return types are rejected. A factory cannot also be a `#[Service]` or service
 provider.
 
-Attributed registrations are deterministic. Two factories for the same
-product, two services for the same identifier, or a service and factory for the
-same identifier stop startup with an error naming both declarations. A single
-application factory may still replace a framework default, such as
-`LoggerInterface` or `ViewRendererInterface`.
+Declaring two factories for the same product, two services for the same
+identifier, or a service and factory for one identifier stops startup with an
+error naming both declarations. One application factory may replace a
+framework default such as `LoggerInterface` or `ViewRendererInterface`.
 
 ## Lifetimes
 
@@ -180,21 +176,21 @@ During HTTP requests, Gustav automatically provides these framework services:
 - `Service\Container`, resolving to the active scope
 
 Commands receive their own active scope with Symfony's input, output, and
-`SymfonyStyle` services. See [Application commands](./commands.md) for the
+`SymfonyStyle` services. See [Commands](./commands.md) for the
 complete command contract.
 
 Prefer injecting the specific dependency a class needs. Declarative factories
 also use constructor injection and do not receive the container in
 `__invoke()`.
 
-See [Logging and request IDs](./logging.md) for writing PSR-3 records,
+See [Logging](../operations/logging.md) for writing PSR-3 records,
 correlating them with requests, and replacing the default logger through
 service discovery.
 
 The default session store is a singleton. A discovered singleton
 `#[Service(as: SessionStoreInterface::class)]` replaces it before requests are
 handled, while `Session` and `CsrfTokenManager` remain isolated to the active
-request. See [Sessions and CSRF](./sessions.md#storage-and-deployment).
+request. See [Sessions and CSRF](../security/sessions-and-csrf.md#storage-and-deployment).
 
 ## Service providers
 

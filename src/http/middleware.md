@@ -31,9 +31,8 @@ class TimingMiddleware extends Base
 
 Attach middleware to a controller to run it for every route in that class.
 Attach it to a route method for one endpoint. The attribute is repeatable and
-takes a middleware class name. Gustav compiles this metadata when the route
-table is built and resolves the middleware through the application container for
-each request.
+takes a middleware class name. Middleware classes support constructor
+injection.
 
 ```php
 use GustavPHP\Gustav\Attribute\{Controller, Get, Middleware};
@@ -62,7 +61,7 @@ Responses pass back through the same middleware in reverse order.
 Framework session handling wraps this pipeline when sessions are enabled.
 `#[Csrf]` validation runs after application-wide middleware and before
 controller or route middleware, request binding, and controller execution.
-See [Sessions and CSRF](./sessions.md#protecting-routes-from-csrf).
+See [Sessions and CSRF](../security/sessions-and-csrf.md#protecting-routes-from-csrf).
 
 ## Mapped error responses
 
@@ -104,8 +103,7 @@ final class SecurityHeadersMiddleware extends Base
 ```
 
 Lower priorities run earlier on the way in and later on the way out.
-Application-wide middleware is resolved through the service container without
-entrypoint registration.
+Application-wide middleware supports constructor injection.
 
 Gustav creates and validates the request ID before application-wide middleware
 runs. Inject `GustavPHP\Gustav\Http\RequestId` when middleware needs it; do not

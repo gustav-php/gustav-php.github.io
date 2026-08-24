@@ -80,5 +80,5 @@ expect($status)->toBe(0);
 
 The tester uses normal command discovery, typed input conversion, validation,
 dependency injection, exception rendering, and scope cleanup without opening a
-port. See [Application commands](./commands.md#testing-commands) for the full
+port. See [Commands](../application/commands.md#testing-commands) for the full
 example and exit-code contract.

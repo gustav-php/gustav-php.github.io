@@ -135,6 +135,6 @@ final class EvenNumber extends Validation
 }
 ```
 
-Safe rule messages are included in the client response. See [Request input errors](./response.md#request-input-errors) for the complete shape.
+Safe rule messages are included in the client response. See [Validation errors](./errors.md#validation-errors) for the complete shape.
 
 Validation applies to client input and controller-side checks. Response serialization failures are unexpected server errors rather than validation violations; see [Serialization](./serialization.md#supported-values).

@@ -1,6 +1,6 @@
 # Philosophy
 
-Hi, I'm [Torsten](https://github.com/TorstenDittmann) and like to code. I'm not here to sell you on the next big thing, but rather to share my opinion about current PHP frameworks and why I wanna do things a little differently.
+Hi, I'm [Torsten](https://github.com/TorstenDittmann), and I like to code. I'm not here to sell you the next big thing, but to share my perspective on current PHP frameworks and explain why I want to do things differently.
 
 ## The Overwhelming Maze
 
@@ -8,44 +8,44 @@ I guess many developers have been in these shoes, navigating the maze of PHP fra
 
 The big players like [Laravel](https://laravel.com) and [Symfony](https://symfony.com) are awesome, no doubt.
 
-But lack developer experience, I think Laravel especially does a really bad job at it. In my opinion, I should be able to navigate and discover the namespaces and classes of my framework by simply following common sense and known naming patterns.
+When it comes to developer experience, I think Laravel especially does a poor job. I should be able to navigate and discover a framework's namespaces and classes by following common sense and familiar naming patterns.
 
-After 1 minute with Laravel you will encounter a wild `Illuminate\Support\Facades\Route` class and this is only the beginning. How do all those terms lead me to creating a `Route` for my "Hello World!" endpoint. It's ecosystem is filled with terms like `Illuminate`, `Eloquent` and `Artisan` that just add an unncessecary layer of complexity.
+Within a minute of using Laravel, you encounter `Illuminate\Support\Facades\Route`, and this is only the beginning. How does that name help me create a route for a "Hello World!" endpoint? Its ecosystem is filled with terms such as `Illuminate`, `Eloquent`, and `Artisan` that add an unnecessary layer of complexity.
 
-Of cource, once you learned the characteristic of Laravel, Symfony and co you can build whatever you want at _enterprise_ level.
+Of course, once you learn the conventions of Laravel, Symfony, and similar frameworks, you can build whatever you want at an _enterprise_ level.
 
 But what if your project isn't an enterprise monolith? What if you want simplicity?
 
 ## Simplicity
 
-I want to keep it lean. I rather give you a blank canvas and let you paint your project the way you want instead of a printer that comes with a manual. No feature bloat, no complexity - just the simple tools you need.
+I want to keep it lean. I'd rather give you a blank canvas and let you shape your project than a printer that comes with a manual.
 
 Have you ever opened a framework's project scaffold only to find it sprouting 15 folders and more files than you can count? It's a recipe for overwhelm. GustavPHP starts you off with a clean slate, not a tangled mess of directories.
 
-That also means, that this framework will not be the swiss knife for all your needs. I don't see this framework ever being shipped with an ORM. Because, honestly, there are some fantastic options available and therefore rather support you in implementing whatever you feel the most comfortable with.
+That also means this framework will not be a Swiss Army knife for every need. I don't see GustavPHP shipping with an ORM because excellent options already exist. I'd rather make it straightforward to use whichever one fits your project.
 
-## No Magic
+## No magic
 
-We all enjoy a little magic, but not when it leaves us in the dark. Some frameworks operate with a touch of 'magic' that can make your codebase feel like a mystery. Probably why Ruby on Rails never hooked me. I value transparency and control. Your code should be a friend, not a stranger.
+We all enjoy a little magic, but not when it leaves us in the dark. Some frameworks operate with a touch of "magic" that can make a codebase feel like a mystery. That is probably why Ruby on Rails never hooked me. I value transparency and control. Your code should be a friend, not a stranger.
 
 ## Type safety
 
-One aspect that's been missing from many PHP frameworks is robust type safety. The recent PHP versions, especially PHP 7.0 and beyond, have made significant improvements in enhancing type hinting and type declarations.
+One aspect missing from many PHP frameworks is robust type safety. Modern PHP provides strong parameter, property, and return type declarations.
 
 However, not all frameworks fully embrace these advancements.
 
 Having to define some `random-string` on a setter method just to pass `random-string` again in a getter method somewhere else with a `mixed` return type tires me.
 
-I want to design GustavPHP with type safety in mind, offering a codebase that benefits from strong type hinting, enabling you to catch errors at compile-time rather than at runtime. This ensures a more reliable and maintainable codebase.
+GustavPHP embraces those declarations so mistakes surface when the application starts instead of deep inside a request. This creates a more reliable and maintainable codebase.
 
 ## Modern PHP
 
 Remember when you were stuck with whatever PHP version your hosting provider decided to throw your way? Those days are luckily over. With containerization tools like Docker, you get to call the shots.
 
-In recent releases the language has undergone a remarkable transformation, introducing features like [Just-in-Time Compilation](https://php.watch/versions/8.0/JIT), [Fibers](https://php.watch/versions/8.1/fibers), [Match Expressions](https://php.watch/versions/8.0/match-expression), [Attributes](https://php.watch/articles/php-attributes), and a plethora of performance enhancements, making it a modern and powerful choice for web developers.
+The language has undergone a remarkable transformation, adding features such as [JIT compilation](https://php.watch/versions/8.0/JIT), [fibers](https://php.watch/versions/8.1/fibers), [match expressions](https://php.watch/versions/8.0/match-expression), and [attributes](https://php.watch/articles/php-attributes).
 
-But it feels like the ecosystem is not ready yet - remembering that there are some popular libraries being stuck supporting legacy version like PHP 5.6 and just cannot take advantage of the newest additions.
+Parts of the ecosystem still support very old PHP versions and therefore cannot take advantage of newer language features. GustavPHP deliberately targets modern PHP.
 
 ## Final
 
-GustavPHP isn't just a framework; it's my personal take on PHP as a developer, and I'm excited to share it with you. I wanna keep things simple, giving you control, and embracing the modern PHP world. It's your project, and I'm here to help you make it shine.
+GustavPHP is my personal take on PHP as a developer. I want to keep things simple, give you control, and embrace modern PHP. It is your project; GustavPHP should help you shape it.

@@ -1,6 +1,8 @@
 # Request input
 
-Controller arguments can bind directly to an HTTP request. Add one input attribute to each argument and declare the PHP type Gustav should produce. Route signatures are checked when the application compiles its route table, and their binding metadata is reused for every request.
+Controller arguments can bind directly to an HTTP request. Add one input
+attribute to each argument and declare the PHP type Gustav should produce.
+Invalid input declarations fail when the application starts.
 
 | Attribute     | Input                    |
 | ------------- | ------------------------ |
@@ -99,7 +101,8 @@ Missing required input, disallowed `null`, and conversion failures produce a str
 
 ## Type conversion
 
-Gustav converts only the following request types. It rejects ambiguous unions such as `int|string` when compiling the route.
+Gustav converts only the following request types. Ambiguous unions such as
+`int|string` are rejected when the application starts.
 
 | PHP type    | Accepted input                                          |
 | ----------- | ------------------------------------------------------- |
@@ -111,7 +114,8 @@ Gustav converts only the following request types. It rejects ambiguous unions su
 | `?T`        | The values accepted by `T`, plus explicit `null`        |
 | backed enum | A valid value of its string or integer backing type     |
 
-Conversion is deterministic: arrays are not coerced to strings, arbitrary objects are not cast, and invalid enum values are rejected.
+Arrays are not coerced to strings, arbitrary objects are not cast, and invalid
+enum values are rejected.
 
 ## Constructor-based DTOs
 
@@ -182,8 +186,8 @@ See [Validation](./validation.md) for attaching rules to DTO fields.
 
 Server-parsed multipart and regular form bodies continue to work. Reading a raw body preserves the position of a seekable PSR-7 stream.
 
-Malformed JSON returns `400`. A non-empty raw body with an unsupported media type returns `415` when body binding is required. Syntactically valid JSON that cannot satisfy the declared PHP types returns `422`. See [Responses](./response.md#request-input-errors) for the JSON error format.
+Malformed JSON returns `400`. A non-empty raw body with an unsupported media type returns `415` when body binding is required. Syntactically valid JSON that cannot satisfy the declared PHP types returns `422`. See [Errors](./errors.md#request-errors) for the JSON response format.
 
 On a `#[Csrf]` route, the reserved form field `_token` is validated and removed
 before this binding pipeline runs. JSON clients can supply the token through
-`X-CSRF-Token`. See [Sessions and CSRF](../sessions.md#protecting-routes-from-csrf).
+`X-CSRF-Token`. See [Sessions and CSRF](../security/sessions-and-csrf.md#protecting-routes-from-csrf).

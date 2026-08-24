@@ -1,6 +1,7 @@
 # Serialization
 
-Gustav has one recursive JSON pipeline for typed controller returns, `json()`, and the legacy `serialize()` helper. It converts PHP values to a predictable JSON representation before the PSR-7 response is built.
+Gustav converts typed controller return values into a predictable JSON
+representation before building the PSR-7 response.
 
 ## Typed JSON responses
 
@@ -79,7 +80,7 @@ public function create(): Controller\Response
 }
 ```
 
-Handlers must declare exactly one named return type. A non-null Gustav response or PSR-7 `ResponseInterface` passes through unchanged; every other supported type is inferred as JSON. Nullable types such as `?DogOutput` are accepted and serialize `null` as JSON `null`. Ambiguous unions, `mixed`, `object`, and `void` are rejected when routes are compiled.
+Handlers must declare exactly one named return type. A non-null Gustav response or PSR-7 `ResponseInterface` passes through unchanged; every other supported type is inferred as JSON. Nullable types such as `?DogOutput` are accepted and serialize `null` as JSON `null`. Ambiguous unions, `mixed`, `object`, and `void` are rejected when the application starts.
 
 ## Supported values
 
@@ -97,7 +98,7 @@ The normalizer handles these values recursively:
 
 Invalid UTF-8 in string values is replaced with the Unicode replacement character, so it cannot silently create an empty or invalid response.
 
-Unbacked enums, closures, resources, non-finite floats, uninitialized public properties, unsupported internal objects, excessive nesting, and circular references cannot be represented. They are programming errors and become a production-safe `500`; they are not client validation errors. A failed serialization affects only that request, and the RoadRunner worker remains available.
+Unbacked enums, closures, resources, non-finite floats, uninitialized public properties, unsupported internal objects, excessive nesting, and circular references cannot be represented. They are programming errors and become a production-safe `500`; they are not client validation errors.
 
 ## Excluding fields
 
@@ -117,14 +118,16 @@ final readonly class AccountOutput
 }
 ```
 
-Non-public and static properties are not serialized. Run-time dynamic properties are ignored by default. Legacy classes that intentionally expose them can opt in with `#[AdditionalProperties]`:
+Non-public and static properties are not serialized. Classes that intentionally
+expose run-time dynamic properties must opt in with `#[AdditionalProperties]`:
 
 ```php
+use AllowDynamicProperties;
 use GustavPHP\Gustav\Attribute\Serializer\AdditionalProperties;
-use GustavPHP\Gustav\Serializer;
 
+#[AllowDynamicProperties]
 #[AdditionalProperties]
-class ExtensibleOutput extends Serializer\Base
+class ExtensibleOutput
 {
     public string $name = 'Rex';
 }
@@ -146,21 +149,5 @@ public function show(): Controller\Response
 }
 ```
 
-The helper uses the same recursive normalizer, enum conversion, exclusions, float handling, and error safety as an inferred JSON response.
-
-## Legacy serializer helper
-
-Existing classes that extend `Serializer\Base` and calls to `serialize()` remain supported:
-
-```php
-use GustavPHP\Gustav\Serializer;
-
-final class Dog extends Serializer\Base
-{
-    public string $name = 'Rex';
-}
-
-return $this->serialize(new Dog());
-```
-
-The legacy facade now delegates to the same normalizer and no longer drops scalar members from mixed arrays. New output DTOs do not need to extend `Serializer\Base`; prefer returning plain readonly classes directly.
+The helper uses the same recursive normalizer, enum conversion, exclusions,
+float handling, and error safety as a directly returned JSON value.

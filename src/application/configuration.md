@@ -1,9 +1,9 @@
 # Configuration
 
 Gustav separates framework bootstrap settings from application settings. The
-starter uses conventional project paths and reads `MODE` without mutable
-application setup. `app/bootstrap.php` returns the configuration shared by the
-HTTP worker and project CLI:
+starter uses conventional project paths and reads `MODE`.
+`app/bootstrap.php` returns the configuration shared by the HTTP worker and
+project CLI:
 
 ```php
 use GustavPHP\Gustav\Configuration;
@@ -89,14 +89,13 @@ final readonly class DatabaseFactory
 }
 ```
 
-No service binding or configuration lookup is required. See
-[Third-party objects with factories](./services.md#third-party-objects-with-factories)
+See [Third-party objects with factories](./services.md#third-party-objects-with-factories)
 for the complete factory contract and lifetime rules.
 
 ## Conversion and optional values
 
-Environment values are strings. Gustav converts them deterministically from
-the declared constructor type:
+Environment values are strings. Gustav converts them from the declared
+constructor type:
 
 | PHP type    | Accepted environment value                                   |
 | ----------- | ------------------------------------------------------------ |
@@ -174,8 +173,8 @@ $configuration = Configuration::forProject(
 );
 ```
 
-The supplied map is the complete test environment, which keeps tests
-deterministic and prevents one test from leaking variables into another.
+The supplied map is the complete test environment, preventing process
+variables from leaking between tests.
 
 ## Custom framework layout
 
@@ -207,4 +206,4 @@ Direct construction reads real process variables for typed application
 configuration. Pass an explicit `Environment` when another source is required.
 The framework `Configuration` object itself remains injectable as a singleton.
 Direct construction disables sessions unless `session` is supplied. See
-[Sessions and CSRF](./sessions.md) for cookie options and custom shared stores.
+[Sessions and CSRF](../security/sessions-and-csrf.md) for cookie options and custom shared stores.

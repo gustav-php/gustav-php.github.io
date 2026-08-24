@@ -1,7 +1,6 @@
 # Typed events
 
-Events are ordinary PHP objects. They carry typed application facts without a
-framework base class, string name, or untyped payload array.
+Events are typed PHP objects passed to one or more listeners.
 
 ```php
 namespace App\Events;
@@ -84,13 +83,11 @@ final readonly class RegisterUser
 Dispatch returns the same event object. Dispatching an event with no matching
 listeners is a no-op and does not throw.
 
-## Discovery
+## Custom namespaces
 
-Gustav recursively discovers `#[Listener]` classes under the application's
-`Events` namespace. Ordinary event objects in the same namespace are ignored.
-No listener registry or bootstrap call is required.
-
-Modules can add listener namespaces through the shared project configuration:
+Place `#[Listener]` classes under the application's `Events` namespace. Add
+listener namespaces from shared packages or modules to the project
+configuration:
 
 ```php
 Configuration::forProject(
@@ -105,9 +102,9 @@ interface. Every compatible listener receives the event.
 
 ## Priority and stopping propagation
 
-Listeners with a higher priority run first. Equal priorities use the listener
-class name as a deterministic tie-breaker. Prefer independent listeners and
-use priority only when ordering is part of the event contract.
+Listeners with a higher priority run first. For equal priorities, listener
+class names determine the order. Prefer independent listeners and use priority
+only when ordering is part of the event contract.
 
 ```php
 #[Listener(priority: 100)]
@@ -152,11 +149,9 @@ An event already marked as stopped invokes no listeners.
 
 ## Scope and failures
 
-The dispatcher and discovered listeners use the active execution scope. A
-listener and its scoped dependencies are created at most once during one HTTP
-request or application command, even when several matching events are
-dispatched. The scope is released afterward, so listener state cannot leak to
-the next RoadRunner request or command.
+A listener and its scoped dependencies are reused during one HTTP request or
+application command, even when several matching events are dispatched. They
+are discarded when that request or command finishes.
 
 Do not inject the scoped dispatcher into a singleton service. Dispatch from a
 scoped service, controller, middleware, command, or listener instead.

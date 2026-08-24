@@ -1,9 +1,9 @@
 # Exception handlers
 
 Application exception handlers turn domain failures into deliberate HTTP
-responses without registration code in the entrypoint. Put an invokable class
-under `App\ExceptionHandlers`, mark it with `#[ExceptionHandler]`, and type its
-single parameter as the exception it handles:
+responses. Put an invokable class under `App\ExceptionHandlers`, mark it with
+`#[ExceptionHandler]`, and type its single parameter as the exception it
+handles:
 
 ```php
 namespace App\Exceptions;
@@ -45,9 +45,6 @@ final readonly class OrderNotFoundHandler
     }
 }
 ```
-
-No `$app->...` call is required. Gustav compiles handler metadata at startup
-and resolves only the selected handler when a request throws its exception.
 
 ## Handler contract
 
@@ -100,17 +97,13 @@ final readonly class CheckoutUnavailableHandler
 ```
 
 `View` responses use the configured application renderer. See
-[Responses](./controllers/response.md) and [Views](./views.md) for the response
+[Responses](./responses.md) and [Views](./views.md) for the response
 APIs.
 
-## Discovery and dependency injection
+## Dependencies
 
-Discovery is recursive below the application's `ExceptionHandlers` namespace.
-Nested module folders are valid, and ordinary unmarked classes are ignored.
-
-Handlers use normal constructor injection. They are created lazily in the
-active request scope, so services such as `ServerRequestInterface`, `RequestId`,
-typed configuration, and application services refer to the current request:
+Handlers support constructor injection. The following handler adds the current
+request ID to its response:
 
 ```php
 use App\Exceptions\RateLimitExceeded;
@@ -138,7 +131,10 @@ final readonly class RateLimitExceededHandler
 }
 ```
 
-Modular applications can add namespaces through shared configuration:
+## Custom namespaces
+
+Add handler namespaces from shared packages or modules to the application
+configuration:
 
 ```php
 use GustavPHP\Gustav\Configuration;
@@ -151,9 +147,6 @@ return Configuration::forProject(
     ],
 );
 ```
-
-Do not repeat the conventional namespace in this list; duplicate class
-discovery is ignored, but the extra entry is unnecessary.
 
 ## Matching order
 
@@ -173,8 +166,8 @@ unmatched exceptions use Gustav's regular production-safe `500` response.
 ## Built-in request errors
 
 `HttpException` and its subclasses always bypass application handlers, even
-when a `Throwable` fallback exists. This preserves framework-owned statuses,
-headers, and structured request-input responses:
+when a `Throwable` fallback exists. Their statuses, headers, and structured
+request-input responses remain unchanged:
 
 - malformed JSON remains `400`;
 - unsupported body media types remain `415`;
@@ -191,7 +184,7 @@ application handler when a domain exception should stay independent of HTTP.
 Domain exceptions from controllers and their middleware are mapped before the
 response unwinds through application-wide middleware. That middleware can
 inspect or amend the mapped response just like a successful response. See
-[Middleware](./middlewares.md#mapped-error-responses).
+[Middleware](./middleware.md#mapped-error-responses).
 
 The mapped response status controls automatic reporting:
 
@@ -203,14 +196,12 @@ safe for clients and do not include credentials, internal exception messages,
 queries, or stack details.
 
 If handler construction, invocation, view rendering, or response conversion
-fails, Gustav does not run another handler. It logs that new failure, returns
-the regular production-safe `500`, releases the request scope, and continues
-serving later RoadRunner requests.
+fails, Gustav does not run another handler. It reports the new failure and
+returns the regular production-safe `500` response.
 
 ## Testing handlers
 
-Test the real application in process; no RoadRunner process or handler
-registration is needed:
+Test handlers through `Application::handle()` with a PSR-7 request:
 
 ```php
 use GustavPHP\Gustav\Application;

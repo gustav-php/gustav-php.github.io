@@ -1,9 +1,8 @@
 # Sessions and CSRF
 
-Gustav provides lazy, server-side sessions for browser applications. A
-conventional project stores them under `storage/sessions`; there is no session
-registry call in the application entrypoint. Inject the request-scoped
-`Session` service wherever state is needed:
+Gustav provides server-side sessions for browser applications. A conventional
+project stores them under `storage/sessions`. Inject the `Session` service
+wherever request state is needed:
 
 ```php
 use GustavPHP\Gustav\Attribute\{Controller, Get};
@@ -72,8 +71,8 @@ survive another request. Calling `keepFlash()` without keys retains all current
 flash entries.
 
 An unexpected exception or `5xx` response does not commit session mutations or
-consume loaded flash data. The storage lease is always released, so one failed
-request cannot leave a RoadRunner worker holding the session lock.
+consume loaded flash data. The storage lease is released when the request
+finishes.
 
 ## Regeneration and invalidation
 
@@ -217,8 +216,8 @@ Do not use host-local files behind a load balancer with multiple application
 replicas. Use a shared store with an equivalent per-session lease, or guarantee
 sticky routing and shared storage whose locking semantics you have verified.
 
-Replace the default through ordinary service discovery—no `$app->services()`
-call is required:
+Register a singleton implementation of `SessionStoreInterface` to replace the
+default file store:
 
 ```php
 namespace App\Services;

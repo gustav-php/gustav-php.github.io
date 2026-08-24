@@ -1,8 +1,7 @@
 # Application commands
 
 Application commands are plain invokable PHP classes. Place them under
-`src/Commands`, add `#[Command]`, and Gustav discovers them automatically. No
-command registry or entrypoint setup is required.
+`src/Commands` and add `#[Command]`:
 
 ```php
 namespace App\Commands;
@@ -60,8 +59,7 @@ The PHP parameter name becomes the input name by default. Camel-case option
 names are converted to kebab case, so `$dryRun` becomes `--dry-run`. Pass an
 explicit name when the CLI contract should differ from the PHP name.
 
-Gustav converts command input using the same deterministic conversion rules as
-HTTP input:
+Command input uses the same conversion rules as HTTP input:
 
 | PHP type    | Command input                                                       |
 | ----------- | ------------------------------------------------------------------- |
@@ -107,8 +105,7 @@ The handler is not invoked when input is invalid. Command exit codes are:
 
 Unexpected application exceptions are logged with the command name. Production
 console output says only `Command failed`; it does not expose the exception
-message or trace. The command scope is released after both success and failure,
-so a failed invocation cannot contaminate a later one in the same process.
+message or trace. Each invocation receives its own command-scoped services.
 
 ## Constructor injection and scope
 
@@ -163,8 +160,7 @@ Configuration::forProject(
 
 ## Testing commands
 
-Use Symfony's in-process `ApplicationTester`; no subprocess or RoadRunner
-server is needed:
+Use Symfony's `ApplicationTester` to run a command in process:
 
 ```php
 use GustavPHP\Gustav\Application;
