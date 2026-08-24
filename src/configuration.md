@@ -64,26 +64,34 @@ final readonly class DatabaseConfig
 
 Gustav discovers and hydrates every `#[Config]` class before request handling
 starts. Each object is registered as an application singleton, so controllers,
-services, and middleware use ordinary constructor injection:
+services, middleware, and service factories use ordinary constructor
+injection:
 
 ```php
-final readonly class DatabaseConnectionFactory
+namespace App\Services;
+
+use App\Config\DatabaseConfig;
+use GustavPHP\Gustav\Attribute\Factory;
+use GustavPHP\Gustav\Service\Lifetime;
+use PDO;
+
+#[Factory(lifetime: Lifetime::Singleton)]
+final readonly class DatabaseFactory
 {
     public function __construct(private DatabaseConfig $configuration)
     {
     }
 
-    public function connect(): PDO
+    public function __invoke(): PDO
     {
         return new PDO($this->configuration->url);
     }
 }
 ```
 
-No service binding or configuration lookup is required.
-
-Service-provider factories can resolve the same singleton when constructing a
-third-party object that cannot be autowired.
+No service binding or configuration lookup is required. See
+[Third-party objects with factories](./services.md#third-party-objects-with-factories)
+for the complete factory contract and lifetime rules.
 
 ## Conversion and optional values
 

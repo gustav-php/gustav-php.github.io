@@ -132,9 +132,9 @@ final class ApplicationLogger extends AbstractLogger
 }
 ```
 
-Use a [service provider](./services.md#service-providers) when a third-party
-logger needs scalar configuration or a pre-built object. Keep a logger
-singleton unless it intentionally depends on scoped state; add the
+Use a [service factory](./services.md#third-party-objects-with-factories) when a
+third-party logger needs typed configuration or library-specific setup. Keep a
+logger singleton unless it intentionally depends on scoped state; add the
 `RequestId` to ordinary application records explicitly when you need
 correlation.
 
