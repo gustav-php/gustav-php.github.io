@@ -73,8 +73,12 @@ configuration or library-specific setup. One invokable factory produces one
 service:
 
 ```php
+namespace App\Services;
+
+use App\Config\DatabaseConfig;
 use GustavPHP\Gustav\Attribute\Factory;
 use GustavPHP\Gustav\Service\Lifetime;
+use PDO;
 
 #[Factory(lifetime: Lifetime::Singleton)]
 final readonly class DatabaseFactory
