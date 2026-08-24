@@ -1,9 +1,9 @@
-# Project Structure
+# Project structure
 
 Gustav does not force a project layout. This is the conventional structure used
 by the starter project.
 
-## Directory Structure
+## Directory structure
 
 The minimal starter structure is:
 
@@ -57,3 +57,7 @@ The `src/` directory contains all the components that build your application:
 - `Serializers/` contains all Serializers
 - `Services/` contains application services, third-party object factories, and
   advanced service providers
+
+Continue with [Controllers](../http/controllers.md) to define HTTP endpoints or
+[Configuration](../application/configuration.md) to add typed environment
+settings.

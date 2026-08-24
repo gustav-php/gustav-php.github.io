@@ -1,21 +1,36 @@
-# Gustav - PHP Framework
+# GustavPHP
 
 ![GustavPHP Logo](/logo.png)
 
-Gustav is a PHP framework for building web applications. It is designed to be simple, object-oriented and using the latest features of PHP.
+GustavPHP is a typed PHP framework for APIs and server-rendered web
+applications. Define endpoints with attributes, receive typed request data, and
+return PHP values as JSON or render them with native PHP views.
 
-- **Simple** - Designed to be easy to use and easy to learn.
-- **OOP** - Designed to be object-oriented.
-- **Fast** - Designed to be fast and lightweight.
-- **Modern** - Designed to use the latest features of PHP.
+```php
+namespace App\Routes;
 
-# Features
+use GustavPHP\Gustav\Attribute\{Controller, Get};
 
-- [x] HTTP Server
-- [x] Typesafety
-- [x] Fast Routing
-- [x] Middlewares
-- [x] Dependency Injection
-- [x] Typed PSR-14 events
-- [x] Auto-reload during development
-- [x] more
+#[Controller('/hello')]
+final readonly class HelloController
+{
+    /** @return array{message: string} */
+    #[Get]
+    public function show(): array
+    {
+        return ['message' => 'Hello, world!'];
+    }
+}
+```
+
+Create and run a project with Composer:
+
+```bash
+composer create-project gustav-php/starter example-app
+cd example-app
+php gustav dev
+```
+
+Continue with [Installation](./getting-started/installation.md) for the local
+requirements and then build your
+[first endpoint](./getting-started/first-endpoint.md).

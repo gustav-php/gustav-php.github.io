@@ -1,14 +1,16 @@
-# Getting started
+# Installation
 
-Before creating your first GustavPHP project, you should ensure that your local machine has [PHP](https://www.php.net/) and [Composer](https://getcomposer.org/) installed.
+GustavPHP requires PHP 8.2 or newer and
+[Composer](https://getcomposer.org/). Composer checks the required PHP
+extensions when it creates the project.
 
-After you have installed PHP and Composer, you may create a new GustavPHP project via the `create-project` command:
+Create a project from the starter:
 
 ```bash
 composer create-project gustav-php/starter example-app
 ```
 
-After the project has been created, start GustavPHP's local development server using the serve command:
+Move into the project and start the development server:
 
 ```bash
 cd example-app
@@ -19,13 +21,8 @@ php gustav dev
 Once the development server starts, the application is available at
 `http://localhost:4201`.
 
-The same project CLI lists built-in and application commands:
-
-```bash
-php gustav list
-php gustav joke --times=2
-```
-
 The starter's committed `.env` contains safe development defaults. Copy
 machine-specific values into `.env.local`; Gustav loads it automatically and
 the file is ignored by Git.
+
+Next, add your [first endpoint](./first-endpoint.md).
