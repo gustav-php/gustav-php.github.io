@@ -14,6 +14,7 @@
     - [Response](./controllers/response.md)
     - [Serialization](./controllers/serialization.md)
 - [Application services](./services.md)
+- [Exception handlers](./exception-handlers.md)
 - [Logging and request IDs](./logging.md)
 - [Middlewares](./middlewares.md)
 - [Authentication](./authentication.md)

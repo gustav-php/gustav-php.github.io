@@ -67,6 +67,12 @@ automatically capture query parameters, request bodies, headers, cookies,
 identity data, or client IP addresses. Add application context deliberately
 and avoid credentials, tokens, and personal data.
 
+[Application exception handlers](./exception-handlers.md) follow the mapped
+response status. A mapped `4xx` remains quiet; a mapped `5xx` reports the
+original domain exception exactly once with the mapped status. If the handler
+itself fails, Gustav reports that handler failure as a `500` and does not run a
+fallback handler recursively.
+
 Unexpected exception details remain hidden from production HTTP responses;
 they are available to the logger instead. If an application logger throws
 while Gustav is reporting a server failure, Gustav writes the record through
