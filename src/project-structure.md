@@ -17,6 +17,7 @@ The minimal starter structure is:
 │  ├─ Config/
 │  ├─ Commands/
 │  ├─ Events/
+│  ├─ ExceptionHandlers/
 │  ├─ Middlewares/
 │  ├─ Routes/
 │  ├─ Serializers/
@@ -49,6 +50,8 @@ The `src/` directory contains all the components that build your application:
 - `Config/` contains immutable typed application configuration
 - `Commands/` contains automatically discovered application commands
 - `Events/` contains typed event objects and discovered `#[Listener]` classes
+- `ExceptionHandlers/` contains discovered domain exception-to-response
+  handlers
 - `Middlewares/` contains all Middlewares
 - `Routes/` contains all Routes
 - `Serializers/` contains all Serializers

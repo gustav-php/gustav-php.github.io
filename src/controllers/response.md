@@ -133,7 +133,8 @@ public function accepted(): ResponseInterface
 
 ## HTTP errors
 
-Throw `HttpException` when application code intentionally needs an HTTP error status and optional headers:
+Throw `HttpException` when application code intentionally needs a
+protocol-level HTTP error status and optional headers:
 
 ```php
 use GustavPHP\Gustav\Http\Exception\HttpException;
@@ -161,6 +162,12 @@ CSRF rejection is also a typed `403` request error with the stable message
 `CSRF token is invalid`.
 
 Do not encode an HTTP status in a generic exception's numeric code. Only typed `HttpException` instances control the response status; an unexpected exception such as `new RuntimeException('failure', 422)` is still a `500`.
+
+Use a discovered [application exception handler](../exception-handlers.md) when
+a domain exception should map to an HTTP response without coupling the domain
+class to `HttpException`. Handlers must return an explicit response object so
+the error status is always deliberate. Built-in `HttpException` and request
+input responses bypass application handlers.
 
 ## Request ID header
 
@@ -236,6 +243,10 @@ Production responses never expose unexpected exception messages, class names, fi
 ```
 
 Development mode keeps the debug page for unexpected exceptions and regular `HttpException` instances. A failed request is isolated to that request; the RoadRunner worker continues serving subsequent requests.
+
+Application exception handlers may deliberately return a public error body for
+a domain failure. If a handler itself fails, Gustav uses this same safe
+unexpected-exception response and never recursively invokes another handler.
 
 Every `5xx` is reported once through `Psr\Log\LoggerInterface` with the request
 ID, method, path, status, and exception. Expected `4xx` responses remain quiet

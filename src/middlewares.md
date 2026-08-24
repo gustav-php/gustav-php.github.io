@@ -64,6 +64,29 @@ Framework session handling wraps this pipeline when sessions are enabled.
 controller or route middleware, request binding, and controller execution.
 See [Sessions and CSRF](./sessions.md#protecting-routes-from-csrf).
 
+## Mapped error responses
+
+Application exception handlers run outside the controller and route middleware
+stack but inside application-wide middleware. A domain exception unwinds its
+controller and route middleware first; Gustav maps it to a response, then that
+response passes back through application-wide middleware. Global timing,
+security-header, and tracing middleware can therefore inspect mapped status and
+headers:
+
+```php
+$response = $handler->handle($request);
+
+if ($response->getStatusCode() >= 500) {
+    return $response->withHeader('Cache-Control', 'no-store');
+}
+
+return $response;
+```
+
+An exception thrown by application-wide middleware itself is mapped at the
+outer request boundary after that middleware stack has unwound. See
+[Exception handlers](./exception-handlers.md) for matching and failure safety.
+
 ## Application-wide middleware
 
 Mark middleware that should wrap every request with `#[GlobalMiddleware]`.

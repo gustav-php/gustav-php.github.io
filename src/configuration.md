@@ -198,6 +198,7 @@ $configuration = new Configuration(
     middlewareNamespaces: ['Module\Billing\Middlewares'],
     configurationNamespaces: ['Module\Billing\Config'],
     commandNamespaces: ['Module\Billing\Commands'],
+    exceptionHandlerNamespaces: ['Module\Billing\ExceptionHandlers'],
     session: new SessionOptions(directory: '/srv/example/var/sessions/'),
 );
 ```
